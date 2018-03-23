@@ -1,0 +1,27 @@
+{
+    "name": "awonderphp/contentsecuritypolicy",
+    "description": "Generates a Content Security Policy header",
+    "homepage": "https://github.com/AliceWonderMiscreations/ContentSecurityPolicy",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Alice Wonder",
+            "role": "Unemployed Maniac",
+            "email": "paypal@domblogger.net"
+        }
+    ],
+    "require": {
+        "php": "~7.1.0 || ~7.2.0"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.*",
+        "vimeo/psalm": "^0",
+        "phpunit/phpunit": "^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "AWonderPHP\\ContentSecurityPolicy\\": "lib/"
+        }
+    }
+}
