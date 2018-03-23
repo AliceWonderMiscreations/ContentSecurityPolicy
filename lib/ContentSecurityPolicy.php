@@ -10,19 +10,38 @@ declare(strict_types=1);
  * @link    https://github.com/AliceWonderMiscreations/ContentSecurityPolicy
  */
 
-namespace AWonderPHP\SimpleCacheAPCu;
+namespace AWonderPHP\ContentSecurityPolicy;
 
 /**
- * An implementation of the PSR-16 SimpleCache Interface for APCu.
+ * An implementation of Content Security Policy.
  *
- * This class implements the [PHP-FIG PSR-16](https://www.php-fig.org/psr/psr-16/)
- *  interface for a cache class.
+ * Based on the specification at https://content-security-policy.com/ but is bit more restrictive
+ * with the nonce, where it requires the nonce be base64 encoded or hex encoded string.
  *
- * It needs PHP 7.1 or newer and obviously the [APCu PECL](https://pecl.php.net/package/APCu) extension.
- *  I am not sure of the minimum APCu version, I am using 5.1.9 myself at the moment.
  */
 class ContentSecurityPolicy
 {
+    /**
+     * Valid CSP Level 1/2 Directives except for default-src
+     *
+     * @var array
+     */
+    protected $validDirectives = array(
+        'script-src',
+        'style-src',
+        'img-src',
+        'connect-src',
+        'font-src',
+        'object-src',
+        'media-src',
+        'child-src',
+        'sandbox',
+        'form-action',
+        'frame-ancestors',
+        'plugin-types',
+        'report-uri'
+    );
+    
     /* CSP Level 1 less deprecated frame-src */
     
     /**
@@ -89,16 +108,16 @@ class ContentSecurityPolicy
      * is blocked. You can keep the sandbox value empty to keep all restrictions in place, or
      * add values.
      *
-     * @var null|array
+     * @var array
      */
-    protected $sandbox = null;
+    protected $sandbox = array();
     
     /**
      * Allowed sandbox values
      *
      * @var array
      */
-    protected $legalSandboxValues = array(
+    protected $validSandboxValues = array(
         'allow-forms',
         'allow-same-origin',
         'allow-scripts',
@@ -187,8 +206,6 @@ class ContentSecurityPolicy
      */
     protected function definePolicy($directive, $keyword): bool
     {
-        $directive = trim(strtolower($directive));
-        $keyword = trim(strtolower($keyword));
         if (! in_array($keyword, array('*', '\'none\'', 'https:'))) {
             return false;
         }
@@ -243,8 +260,6 @@ class ContentSecurityPolicy
      */
     protected function addUnsafe($directive, $unsafe): bool
     {
-        $directive = trim(strtolower($directive));
-        $unsafe = trim(strtolower($unsafe));
         if (! in_array($unsafe, array('unsafe-inline', 'unsafe-eval'))) {
             return false;
         }
@@ -267,6 +282,96 @@ class ContentSecurityPolicy
         }
         return false;
     }//end addUnsafe()
+    
+    /**
+     * Checks to see whether inline scripts are allowed in current policy
+     *
+     * @return bool
+     */
+    protected function checkInlineScriptsAllowed()
+    {
+        $n = count($this->scriptSrc);
+        switch ($n) {
+            case 0:
+                $defaultPolicy = $this->defaultSrc[0];
+                if ($defaultPolicy === '\'none\'') {
+                    return false;
+                }
+                break;
+            case 1:
+                $scriptPolicy = $this->scriptSrc[0];
+                if ($scriptPolicy === '\'none\'') {
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }//end checkInlineScriptsAllowed()
+
+    
+    /**
+     * Checks to see whether inline style are allowed in current policy
+     *
+     * @return bool
+     */
+    protected function checkInlineStyleAllowed()
+    {
+        $n = count($this->styleSrc);
+        switch ($n) {
+            case 0:
+                $defaultPolicy = $this->defaultSrc[0];
+                if ($defaultPolicy === '\'none\'') {
+                    return false;
+                }
+                break;
+            case 1:
+                $scriptPolicy = $this->styleSrc[0];
+                if ($scriptPolicy === '\'none\'') {
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }//end checkInlineStyleAllowed()
+
+    
+    /**
+     * Add or create a policy to the specified directive
+     *
+     * @param string $directive The CSP directive to apply the policy to.
+     * @param string $policy    The policy to apply to the CSP directive.
+     *
+     * @return bool True on success, False on failure
+     */
+    public function addDirectivePolicy(string $directive, string $policy): bool
+    {
+        $directive = trim(strtolower($directive));
+        $policy = trim(strtolower($policy));
+        if (! in_array($directive, $this->validDirectives)) {
+            throw InvalidArgumentException::invalidDirective($directive);
+        }
+        switch ($directive) {
+            case 'sandbox':
+                if (! in_array($policy, $this->validSandboxValues)) {
+                    throw InvalidArgumentException::invalidSandboxPolicy($policy);
+                }
+                if (! in_array($policy, $this->sandbox)) {
+                    $this->sandbox[] = $policy;
+                }
+                return true;
+                break;
+            default:
+                if ($this->definePolicy($directive, $policy)) {
+                    return true;
+                }
+                if ($this->addUnsafe($directive, $policy)) {
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }//end addDirectivePolicy()
+
 
 
     
@@ -278,13 +383,13 @@ class ContentSecurityPolicy
      *
      * @return bool True on success, False on failure
      */
-    public function addNonce($directive, $nonce)
+    public function addNonce($directive, string $nonce)
     {
+        // FIXME - make sure it makes sense to add
         $nonce = trim($nonce);
         if (! ctype_xdigit($nonce)) {
             if (base64_encode(base64_decode($nonce)) !== $nonce) {
-              #fixme throw exception
-                return false;
+                throw InvalidArgumentException::badNonce($nonce);
             }
         }
         $directive = trim(strtolower($directive));
@@ -294,18 +399,52 @@ class ContentSecurityPolicy
         $policy = '\'nonce-' . $nonce . '\'';
         switch ($directive) {
             case 'script-src':
+                if (! $this->checkInlineScriptsAllowed()) {
+                    return false;
+                }
                 $this->scriptSrc[] = $policy;
                 break;
             default:
+                if (! $this->checkInlineStyleAllowed()) {
+                    return false;
+                }
                 $this->styleSrc[] = $policy;
         }
         return true;
     }//end addNonce()
+    
+    /**
+     * Adds script sha256. Throws exception if invalid.
+     *
+     * @param string $hash The sha256 sum to allow.
+     *
+     * @return bool
+     */
+    public function addInlineScriptHash($hash): bool
+    {
+        if (! $this->checkInlineScriptsAllowed()) {
+            return false;
+        }
+        if (ctype_xdigit($hash)) {
+            $raw = hexdec($hash);
+            $hash = base64_encode($hash);
+        }
+        if (base64_encode(base64_decode($hash)) !== $hash) {
+            throw InvalidArgumentException::badHash();
+        }
+        if (strlen($hash) !== 44) {
+            throw InvalidArgumentException::badHash();
+        }
+        $policy = '\'sha256-' . $hash . '\'';
+        $this->scriptSrc[] = $policy;
+        return true;
+    }//end addInlineScriptHash()
+
 
     /**
      * This generates a nonce. A nonce for CSP is a different concept than with cryptography.
      *
-     * In crytography, a nonce only needs to be unique, it is okay if it is relatively
+     * In cryptography, a nonce only needs to be unique, it is okay if it is relatively
      * predictable, it just can't be reused with the same secret. With CSP, it can not be
      * predictable so it is not something that can just be incremented after each use.
      *
@@ -317,7 +456,7 @@ class ContentSecurityPolicy
      *
      * @return string A base64 encoded random nonce
      */
-    public function generateNonce(int $bytes = 8): string
+    public static function generateNonce(int $bytes = 8): string
     {
         if ($bytes < 8) {
             $bytes = 8;
@@ -325,8 +464,6 @@ class ContentSecurityPolicy
         $random = random_bytes($bytes);
         return base64_encode($random);
     }//end generateNonce()
-
-     
 
     /**
      * Creates the CSP header string
@@ -400,7 +537,6 @@ class ContentSecurityPolicy
         }
         return implode(' ', $directives);
     }//end buildHeader()
-
     
     /**
      * Sends the content security policy header.
@@ -413,6 +549,32 @@ class ContentSecurityPolicy
         header('Content-Security-Policy: ' . $string);
         return;
     }//end sendCspHeader()
+    
+    /**
+     * The constructor function
+     *
+     * @param null|string $param The optional path to a JSON configuration file or a default
+     *                           policy for default-src.
+     */
+    public function __construct($param = null)
+    {
+        if (! is_null($param)) {
+            $param = trim($param);
+            $test = strtolower(substr($param, -5));
+            if ($test === '.json') {
+              //json file
+                $a = 'b';
+            } else {
+                $arr = explode(';', $param);
+                foreach ($arr as $policy) {
+                    if (! $this->definePolicy('default-src', $policy)) {
+                      //url policy
+                        $a = 'b';
+                    }
+                }
+            }
+        }
+    }//end __construct()
 }//end class
 
 ?>
