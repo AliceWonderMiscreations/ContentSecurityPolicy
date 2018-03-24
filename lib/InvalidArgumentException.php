@@ -72,7 +72,7 @@ class InvalidArgumentException extends \InvalidArgumentException
     public static function badHash()
     {
         return new self(sprintf(
-            'The hash must be a valid hex or base64 encoded sha256 hash.',
+            'The hash must be a valid hex or base64 encoded sha256 hash.'
         ));
     }//end badHash()
 }//end class

@@ -244,5 +244,110 @@ final class ContentSecurityPolicyTest extends TestCase
         $len = strlen($hex);
         $this->assertEquals(24, $len);
     }//end testGenerateNonce()
+    
+    /**
+     * Test script with base64 nonce
+     *
+     * @return null
+     */
+    public function testScriptNonceBase64(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $expected = 'default-src \'self\'; script-src \'nonce-' . $nonce . '\'; object-src \'none\';';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
+        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addNonce('script-src', $nonce);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * Test script with hex nonce
+     *
+     * @return null
+     */
+    public function testScriptNonceHex(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $raw = base64_decode($nonce);
+        $nonce = bin2hex($raw);
+        $expected = 'default-src \'self\'; script-src \'nonce-' . $nonce . '\'; object-src \'none\';';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
+        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addNonce('script-src', $nonce);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * Test style with base64 nonce
+     *
+     * @return null
+     */
+    public function testStyleNonceBase64(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $expected = 'default-src \'self\'; style-src \'nonce-' . $nonce . '\'; object-src \'none\';';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
+        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addNonce('style-src', $nonce);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * Test style with base64 nonce
+     *
+     * @return null
+     */
+    public function testStyleNonceHex(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $raw = base64_decode($nonce);
+        $nonce = bin2hex($raw);
+        $expected = 'default-src \'self\'; style-src \'nonce-' . $nonce . '\'; object-src \'none\';';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
+        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addNonce('style-src', $nonce);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * Test script hash with base64 hash
+     *
+     * @return null
+     */
+    public function testScriptHashBase64(): void
+    {
+        $raw = random_bytes(32);
+        $hash = base64_encode($raw);
+        $expected = 'default-src \'self\'; script-src \'sha256-' . $hash . '\'; object-src \'none\';';
+        
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
+        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addInlineScriptHash($hash);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }
+    
+    /**
+     * Test script hash with hex hash
+     *
+     * @return null
+     */
+    public function testScriptHashHex(): void
+    {
+        $raw = random_bytes(32);
+        $hash64 = base64_encode($raw);
+        $expected = 'default-src \'self\'; script-src \'sha256-' . $hash64 . '\'; object-src \'none\';';
+        $hash = bin2hex($raw);
+        
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
+        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addInlineScriptHash($hash);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }
 }//end class
 

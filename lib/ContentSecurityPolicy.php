@@ -210,7 +210,7 @@ class ContentSecurityPolicy
     
     /**
      * Defines the policy to the specified policy keyword. This is for
-     * keywords where the keyword implies only policy for directive.
+     * keywords where the keyword implies first or only policy for directive.
      *
      * @param string $directive  The directive to be defined.
      * @param string $keyword    The policy keyword.
@@ -440,7 +440,7 @@ class ContentSecurityPolicy
         }
         if (ctype_xdigit($hash)) {
             $raw = hex2bin($hash);
-            $hash = base64_encode($hash);
+            $hash = base64_encode($raw);
         }
         if (base64_encode(base64_decode($hash)) !== $hash) {
             throw InvalidArgumentException::badHash();
@@ -530,10 +530,8 @@ class ContentSecurityPolicy
         if (count($this->sandbox) > 0) {
             $directives[] = 'sandbox ' . implode(' ', $this->sandbox) . ';';
         }
-        if ($this->formAction !== $this->defaultSrc) {
-            if (count($this->formAction) > 0) {
-                $directives[] = 'form-action ' . implode(' ', $this->formAction) . ';';
-            }
+        if (count($this->formAction) > 0) {
+            $directives[] = 'form-action ' . implode(' ', $this->formAction) . ';';
         }
         if (count($this->frameAncestors) > 0) {
             $directives[] = 'frame-ancestors ' . implode(' ', $this->frameAncestors) . ';';
