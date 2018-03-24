@@ -50,7 +50,7 @@ class ContentSecurityPolicy
      *
      * @var array
      */
-    protected $defaultSrc = array('\'self\'');
+    protected $defaultSrc = array('\'none\'');
     
     /**
      * Defines valid sources of JavaScript. Uses defaultSrc when null
@@ -79,7 +79,7 @@ class ContentSecurityPolicy
      *
      * @var array
      */
-    protected $connectSrc = array('\'self\'');
+    protected $connectSrc = array();
     
     /**
      * Defines valid sources of fonts.
@@ -93,7 +93,7 @@ class ContentSecurityPolicy
      *
      * @var array
      */
-    protected $objectSrc = array('\'self\'');
+    protected $objectSrc = array();
     
     /**
      * Defines valid sources of audio and video, eg HTML5 <audio>, <video> elements.
@@ -153,14 +153,14 @@ class ContentSecurityPolicy
      *
      * @var array
      */
-    protected $childSrc = array('\'self\'');
+    protected $childSrc = array();
     
     /**
      * Defines valid sources that can be used as a HTML <form> action.
      *
      * @var array
      */
-    protected $formAction = array('\'self\'');
+    protected $formAction = array();
     
     /**
      * Defines valid sources for embedding the resource using <frame> <iframe> <object>
@@ -169,7 +169,7 @@ class ContentSecurityPolicy
      *
      * @var array
      */
-    protected $frameAncestors = array('\'none\'');
+    protected $frameAncestors = array();
     
     /**
      * Defines valid MIME types for plugins invoked via <object> and <embed>. To load an
@@ -180,20 +180,33 @@ class ContentSecurityPolicy
     protected $pluginTypes = array('image/svg+xml', 'application/pdf');
     
     /**
-     * Non URL Source List Keywords
+     * Adjust the policy to add single upquote where needed
      *
-     * @var array
+     * @param string $policy The policy string to adjust.
      *
+     * @return string
      */
-    protected $sourceKeywords = array(
-        '*',
-        '\'none\'',
-        '\'self\'',
-        'data:',
-        'https:',
-        '\'unsafe-inline\'',
-        '\'unsafe-eval\''
-    );
+    protected function adjustPolicy($policy)
+    {
+        $policy = trim($policy);
+        $test = strtolower($policy);
+        switch ($test) {
+            case 'none':
+                $policy = ('\'none\'');
+                break;
+            case '\'none\'':
+                $policy = ('\'none\'');
+                break;
+            case 'self':
+                $policy = ('\'self\'');
+                break;
+            case '\'self\'':
+                $policy = ('\'self\'');
+                break;
+        }
+        return $policy;
+    }//end adjustPolicy()
+
     
     /**
      * Defines the policy to the specified policy keyword. This is for
@@ -206,7 +219,7 @@ class ContentSecurityPolicy
      */
     protected function definePolicy($directive, $keyword): bool
     {
-        if (! in_array($keyword, array('*', '\'none\'', 'https:'))) {
+        if (! in_array($keyword, array('*', '\'self\'', '\'none\'', 'https:'))) {
             return false;
         }
         switch ($directive) {
@@ -346,7 +359,7 @@ class ContentSecurityPolicy
     public function addDirectivePolicy(string $directive, string $policy): bool
     {
         $directive = trim(strtolower($directive));
-        $policy = trim(strtolower($policy));
+        $policy = $this->adjustPolicy($policy);
         if (! in_array($directive, $this->validDirectives)) {
             throw InvalidArgumentException::invalidDirective($directive);
         }
@@ -426,7 +439,7 @@ class ContentSecurityPolicy
             return false;
         }
         if (ctype_xdigit($hash)) {
-            $raw = hexdec($hash);
+            $raw = hex2bin($hash);
             $hash = base64_encode($hash);
         }
         if (base64_encode(base64_decode($hash)) !== $hash) {
@@ -479,9 +492,9 @@ class ContentSecurityPolicy
                 $directives[] = 'script-src ' . implode(' ', $this->scriptSrc) . ';';
             }
         }
-        if ($this->styleSrc !== $this->defaultSrc) {
-            if (count($this->styleSrc) > 0) {
-                $directives[] = 'style-src ' . implode(' ', $this->styleSrc) . ';';
+        if ($this->connectSrc !== $this->defaultSrc) {
+            if (count($this->connectSrc) > 0) {
+                $directives[] = 'connect-src ' . implode(' ', $this->connectSrc) . ';';
             }
         }
         if ($this->imgSrc !== $this->defaultSrc) {
@@ -489,9 +502,9 @@ class ContentSecurityPolicy
                 $directives[] = 'img-src ' . implode(' ', $this->imgSrc) . ';';
             }
         }
-        if ($this->connectSrc !== $this->defaultSrc) {
-            if (count($this->connectSrc) > 0) {
-                $directives[] = 'connect-src ' . implode(' ', $this->connectSrc) . ';';
+        if ($this->styleSrc !== $this->defaultSrc) {
+            if (count($this->styleSrc) > 0) {
+                $directives[] = 'style-src ' . implode(' ', $this->styleSrc) . ';';
             }
         }
         if ($this->fontSrc !== $this->defaultSrc) {
@@ -514,19 +527,31 @@ class ContentSecurityPolicy
                 $directives[] = 'child-src ' . implode(' ', $this->childSrc) . ';';
             }
         }
-        if (! is_null($this->sandbox)) {
+        if (count($this->sandbox) > 0) {
             $directives[] = 'sandbox ' . implode(' ', $this->sandbox) . ';';
         }
         if ($this->formAction !== $this->defaultSrc) {
             if (count($this->formAction) > 0) {
-                $directives[] = 'formaction ' . implode(' ', $this->formAction) . ';';
+                $directives[] = 'form-action ' . implode(' ', $this->formAction) . ';';
             }
         }
         if (count($this->frameAncestors) > 0) {
             $directives[] = 'frame-ancestors ' . implode(' ', $this->frameAncestors) . ';';
         }
         if (count($this->pluginTypes) > 0) {
-            $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
+            $bool = false;
+            if (count($this->objectSrc) === 0) {
+                if ($this->defaultSrc[0] !== '\'none\'') {
+                    $bool = true;
+                }
+            } else {
+                if ($this->objectSrc[0] !== '\'none\'') {
+                    $bool = true;
+                }
+            }
+            if ($bool) {
+                $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
+            }
         }
         if (! is_null($this->reportUri)) {
             $h = 'report-uri';
@@ -558,7 +583,13 @@ class ContentSecurityPolicy
      */
     public function __construct($param = null)
     {
-        if (! is_null($param)) {
+        if (is_null($param)) {
+            $this->definePolicy('script-src', '\'self\'');
+            $this->definePolicy('connect-src', '\'self\'');
+            $this->definePolicy('style-src', '\'self\'');
+            $this->definePolicy('img-src', '\'self\'');
+            $this->definePolicy('media-src', '\'self\'');
+        } else {
             $param = trim($param);
             $test = strtolower(substr($param, -5));
             if ($test === '.json') {
@@ -567,6 +598,7 @@ class ContentSecurityPolicy
             } else {
                 $arr = explode(';', $param);
                 foreach ($arr as $policy) {
+                    $policy = $this->adjustPolicy($policy);
                     if (! $this->definePolicy('default-src', $policy)) {
                       //url policy
                         $a = 'b';
