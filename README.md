@@ -1,7 +1,89 @@
 ContentSecurityPolicy
 =====================
 
-Not ready for use
+__THIS CLASS IS NOT YET READY FOR USE__
+
+Content Security Policy (abbreviated as CSP) is a standardized mechanism for
+web applications to tell the requesting client what kind of resources are
+allowed in a web page and under what conditions they are allowed.
+
+There are three versions of the standard. The third version, known as CSP level
+3, is *nearly* finalized but is still in draft form. However even though it is
+still in draft form and therefore still subject to change, it is already being
+implemented by browsers and is the standard this class is written to implement.
+
+
+How CSP Works
+-------------
+
+Content Security Policy is a collection of directives for different types of
+resources a web page might use. These directives are placed together in a
+string and served to the client with the web page the policy is to be applied
+to.
+
+It can be sent to the client either as a header or as a `<meta>` tag in the
+web page. It is preferable to send it as a header. The string containing the
+policy will simply be referred to as the “CSP Header” in this document.
+
+If the connection is not served over
+[TLS](https://en.wikipedia.org/wiki/Transport_Layer_Security) then it is not
+that difficult for the attacker to modify or even completely remove the CSP
+header, CSP is not an effective means of providing protection to your users if
+you do not use TLS.
+
+The CSP header is basically a serialized array of directives, which each
+directive specifying a set of policies specific to that directive.
+
+### Policy Directives
+
+Directives are usually classified into five different categories:
+
+1. __Fetch Directives__  
+  These directives specify rules regarding where a resource is allowed to come
+  from. At least presently, it is easy to distinguish fetch directives from the
+  other kind of directives because the directive name *always* ends with `-src`
+  and non-fetch directive names *never* end in `-src`. There is a special fetch
+  directive called `default-src` that sets the policy for other fetch
+  directives when they are not explicitly defined.
+2. __Document Directives__  
+  These directives specify rules about the properties of a document resource or
+  a [Web Worker](https://en.wikipedia.org/wiki/Web_worker) environment.
+3. __Navigation Directives__  
+  These directives specify rules about locations content can be submitted to or
+  locations the user can navigate to.
+4. __Reporting Directives__  
+  These directives specify if and how policy abuse reporting should be done.
+  Presently there are only two reporting directives, one is in the process of
+  being deprecated but the other, its replacement, is not currently supported
+  by many browsers. Reporting directives *always* begin with `report-`.
+5. __Miscellaneous Directives__  
+  These are directives that do not fit into the four defined categories. My
+  personal opinion is that none of these directives belong as part of CSP but
+  presently they are defined by the standard.
+
+The order the directives in the CSP header does not matter, but it is fairly
+standard to keep them together and put the fetch directives first, with the
+`default-src` directive as the very first directive.
+
+As the rules set within `default-src` apply to any fetch directive that does
+not have its own rules specifically defined, I have set `default-src` to the
+keyword `'none'` by default in this class. I recommend using the keyword
+`'self'` as a starting point for that directive in actual use but it would not
+be responsible of me to set that as the default in this class.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 APPENDIX
@@ -25,7 +107,10 @@ The issue is that it is not possible for the browser to determine whether
 inline scripts are legitimate or the result of a code injection.
 
 With JS/CSS in external files, the browser can look at the CSP policy and make
-sure they are being served from a source that is allowed.
+sure they are being served from a source that is allowed, it usually is much
+harder for an attacker to upload a malicious script such that it can be used
+as an external resource on a domain the security policy allows than it is for
+them to find am XSS injection vector.
 
 Obviously the best thing to do is simply not use any inline JavaScript and
 CSS and new web applications should be developed that way (jQuery makes it a
@@ -102,6 +187,11 @@ __NOTE:__ Even with a nonce, XSS script injection is still possible. To see
 more information on how, the
 [W3C documentation](https://w3c.github.io/webappsec-csp/#security-considerations)
 does a really good job at explaining.
+
+### The SHA-2 Method
+
+An even more robust method of securing inline scripts is to send a SHA-2 hash
+of inline scripts as part of the CSP header.
 
 
 The `frame-src`, `child-src`, and `worker-src` Directives
