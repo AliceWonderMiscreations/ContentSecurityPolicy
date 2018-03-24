@@ -22,7 +22,7 @@ final class ContentSecurityPolicyTest extends TestCase
      */
     public function testBasicDefault(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\'; connect-src \'self\'; img-src \'self\'; style-src \'self\'; media-src \'self\';';
+        $expected = 'default-src \'none\'; connect-src \'self\'; img-src \'self\'; media-src \'self\'; script-src \'self\'; style-src \'self\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy();
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -283,7 +283,7 @@ final class ContentSecurityPolicyTest extends TestCase
     public function testScriptNonceBase64(): void
     {
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'self\'; script-src \'nonce-' . $nonce . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'nonce-' . $nonce . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
         $csp->addNonce('script-src', $nonce);
@@ -299,7 +299,7 @@ final class ContentSecurityPolicyTest extends TestCase
     public function testStyleNonceBase64(): void
     {
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'self\'; style-src \'nonce-' . $nonce . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; style-src \'nonce-' . $nonce . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
         $csp->addNonce('style-src', $nonce);
@@ -316,7 +316,7 @@ final class ContentSecurityPolicyTest extends TestCase
     {
         $raw = random_bytes(32);
         $hash = base64_encode($raw);
-        $expected = 'default-src \'self\'; script-src \'sha256-' . $hash . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha256-' . $hash . '\';';
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
@@ -334,7 +334,7 @@ final class ContentSecurityPolicyTest extends TestCase
     {
         $raw = random_bytes(32);
         $hash64 = base64_encode($raw);
-        $expected = 'default-src \'self\'; script-src \'sha256-' . $hash64 . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha256-' . $hash64 . '\';';
         $hash = bin2hex($raw);
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
@@ -353,7 +353,7 @@ final class ContentSecurityPolicyTest extends TestCase
     {
         $raw = random_bytes(48);
         $hash = base64_encode($raw);
-        $expected = 'default-src \'self\'; script-src \'sha384-' . $hash . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha384-' . $hash . '\';';
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
@@ -371,7 +371,7 @@ final class ContentSecurityPolicyTest extends TestCase
     {
         $raw = random_bytes(48);
         $hash64 = base64_encode($raw);
-        $expected = 'default-src \'self\'; script-src \'sha384-' . $hash64 . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha384-' . $hash64 . '\';';
         $hash = bin2hex($raw);
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
@@ -390,7 +390,7 @@ final class ContentSecurityPolicyTest extends TestCase
     {
         $raw = random_bytes(64);
         $hash = base64_encode($raw);
-        $expected = 'default-src \'self\'; script-src \'sha512-' . $hash . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha512-' . $hash . '\';';
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
@@ -408,7 +408,7 @@ final class ContentSecurityPolicyTest extends TestCase
     {
         $raw = random_bytes(64);
         $hash64 = base64_encode($raw);
-        $expected = 'default-src \'self\'; script-src \'sha512-' . $hash64 . '\'; object-src \'none\';';
+        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha512-' . $hash64 . '\';';
         $hash = bin2hex($raw);
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');

@@ -23,100 +23,145 @@ namespace AWonderPHP\ContentSecurityPolicy;
 class ContentSecurityPolicy
 {
     /**
-     * Valid CSP Level 1/2 Directives except for default-src
+     * Valid CSP Directives except for default-src.
      *
      * @var array
      */
     protected $validDirectives = array(
-        'script-src',
-        'style-src',
-        'img-src',
         'connect-src',
         'font-src',
-        'manifest-src',
-        'object-src',
-        'media-src',
         'frame-src',
+        'img-src',
+        'manifest-src',
+        'media-src',
+        'object-src',
+        'script-src',
+        'style-src',
         'worker-src',
+        'base-uri',
+        'plugin-types',
         'sandbox',
         'form-action',
         'frame-ancestors',
-        'plugin-types',
         'report-uri'
     );
     
-    /* CSP Level 1 less deprecated frame-src */
+    /**
+     * Experimental CSP Directives not yet widely supported.
+     *
+     * @var array
+     */
+    protected $experimentalDirectives = array(
+        'disown-opener',
+        'navigation-to',
+        'report-to'
+    );
+    
+    /* Fetch Directives */
     
     /**
-     * Default policy for loading content such as JavaScript, Images, CSS, Fonts, AJAX
-     * requests, Frames, HTML5 Media.
+     * Serves as a fallback for the other fetch directives.
      *
      * @var array
      */
     protected $defaultSrc = array('\'none\'');
     
     /**
-     * Defines valid sources of JavaScript. Uses defaultSrc when null
-     *
-     * @var array
-     */
-    protected $scriptSrc = array();
-    
-    /**
-     * Defines valid sources of stylesheets.
-     *
-     * @var array
-     */
-    protected $styleSrc = array();
-    
-    /**
-     * Defines valid sources of images.
-     *
-     * @var array
-     */
-    protected $imgSrc = array();
-    
-    /**
-     * Applies to XMLHttpRequest (AJAX), WebSocket or EventSource. If not allowed the browser
-     * emulates a 400 HTTP status code.
+     * Restricts the URLs which can be loaded using script interfaces.
      *
      * @var array
      */
     protected $connectSrc = array();
     
     /**
-     * Defines valid sources of fonts.
+     * Specifies valid sources for fonts loaded using @font-face.
      *
      * @var array
      */
     protected $fontSrc = array();
     
     /**
-     * Defines valid sources for manifest.
+     * Specifies valid sources for nested browsing contexts loading using elements such as
+     * <frame> and <iframe>.
+     *
+     * @var array
+     */
+    protected $frameSrc = array();
+    
+    /**
+     * Specifies valid sources of images and favicons.
+     *
+     * @var array
+     */
+    protected $imgSrc = array();
+    
+    /**
+     * Specifies valid sources of application manifest files.
      *
      * @var array
      */
     protected $manifestSrc = array();
-    
+
     /**
-     * Defines valid sources of plugins, eg <object>, <embed> or <applet>.
-     *
-     * @var array
-     */
-    protected $objectSrc = array();
-    
-    /**
-     * Defines valid sources of audio and video, eg HTML5 <audio>, <video> elements.
+     * Specifies valid sources for loading media using the <audio> , <video> and <track>
+     * elements.
      *
      * @var array
      */
     protected $mediaSrc = array();
     
     /**
-     * Enables a sandbox for the requested resource similar to the iframe sandbox attribute.
-     * The sandbox applies a same origin policy, prevents popups, plugins and script execution
-     * is blocked. You can keep the sandbox value empty to keep all restrictions in place, or
-     * add values.
+     * Specifies valid sources for the <object>, <embed>, and <applet> elements.
+     *
+     * @var array
+     */
+    protected $objectSrc = array();
+    
+    /**
+     * Specifies valid sources for JavaScript.
+     *
+     * @var array
+     */
+    protected $scriptSrc = array();
+    
+    /**
+     * Specifies valid sources for stylesheets.
+     *
+     * @var array
+     */
+    protected $styleSrc = array();
+
+    /**
+     * Specifies valid sources for Worker, SharedWorker, or ServiceWorker scripts.
+     *
+     * @var array
+     */
+    protected $workerSrc = array();
+    
+    /* Document Directives */
+    
+    /**
+     * Restricts the URLs which can be used in a document's <base> element.
+     *
+     * @var array
+     */
+    protected $baseUri = array();
+    
+    /**
+     * Restricts the set of plugins that can be embedded into a document by limiting the types
+     * of resources which can be loaded.
+     *
+     * The arguments must be valid MIME types of the form <type>/<subtype> e.g:
+     * 'application/x-shockwave-flash'.
+     *
+     * In this implementation, image/svg+xml and application/pdf are allowed by default.
+     *
+     * @var array
+     */
+    protected $pluginTypes = array('image/svg+xml', 'application/pdf');
+    
+    /**
+     * Enables a sandbox for the requested resource similar to the <iframe> sandbox attribute.
      *
      * @var array
      */
@@ -129,72 +174,65 @@ class ContentSecurityPolicy
      */
     protected $validSandboxValues = array(
         'allow-forms',
-        'allow-same-origin',
-        'allow-scripts',
-        'allow-popups',
         'allow-modals',
         'allow-orientation-lock',
         'allow-pointer-lock',
-        'allow-presentation',
+        'allow-popups',
         'allow-popups-to-escape-sandbox',
+        'allow-presentation',        
+        'allow-same-origin',        
+        'allow-scripts',
         'allow-top-navigation'
         );
+        
+    /* Navigation Directives */
     
     /**
-     * Instructs the browser to POST reports of policy failures to this URI.
-     *
-     * @var null|string
-     */
-    protected $reportUri = null;
-    
-    /**
-     * Changes report-uri header to report-uri-Report-Only so that the resource violation is
-     * reported but is not actually blocked.
-     *
-     * @var bool
-     */
-    protected $reportOnly = false;
-    
-    /* CSP Level 2 additions */
-    
-    /**
-     * Defines valid sources for nested browsing contexts loaded using elements such as
-     * <frame> and <iframe>
-     *
-     * @var array
-     */
-    protected $frameSrc = array();
-    
-    /**
-     * Defines valid sources for web workers
-     *
-     * @var array
-     */
-    protected $workerSrc = array();
-    
-    /**
-     * Defines valid sources that can be used as a HTML <form> action.
+     * Restricts the URLs which can be used as the target of a form submissions from a given
+     * context.
      *
      * @var array
      */
     protected $formAction = array();
     
     /**
-     * Defines valid sources for embedding the resource using <frame> <iframe> <object>
-     * <embed> <applet>. Setting this directive to 'none' should be roughly equivalent to
-     * X-Frame-Options: DENY
+     * Specifies valid parents that may embed a page using <frame>, <iframe>, <object>,
+     * <embed>, or <applet>.
      *
      * @var array
      */
     protected $frameAncestors = array();
     
+    /* Reporting Directives */
+    
     /**
-     * Defines valid MIME types for plugins invoked via <object> and <embed>. To load an
-     * <applet> you must specify application/x-java-applet.
+     * Instructs the user agent to report attempts to violate the Content Security Policy.
+     * These violation reports consist of JSON documents sent via an HTTP POST request to the
+     * specified URI.
      *
-     * @var array
+     * This directive will likely be replaced by the experimental report-to directive
+     *
+     * @var null|string
      */
-    protected $pluginTypes = array('image/svg+xml', 'application/pdf');
+    protected $reportUri = null;
+    
+    /**
+     * Changes Content-Security-Policy header to Content-Security-Policy-Report-Only so that
+     * the resource violation is reported but is not actually blocked.
+     *
+     * @var bool
+     */
+    protected $reportOnly = false;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     /**
      * Adjust the policy to add single upquote where needed
@@ -255,32 +293,32 @@ class ContentSecurityPolicy
             case 'default-src':
                 $this->defaultSrc = array($keyword);
                 break;
-            case 'script-src':
-                $this->scriptSrc = array($keyword);
-                break;
-            case 'style-src':
-                $this->styleSrc = array($keyword);
-                break;
-            case 'img-src':
-                $this->imgSrc = array($keyword);
-                break;
             case 'connect-src':
                 $this->connectSrc = array($keyword);
                 break;
             case 'font-src':
                 $this->fontSrc = array($keyword);
                 break;
+            case 'frame-src':
+                $this->frameSrc = array($keyword);
+                break;
+            case 'img-src':
+                $this->imgSrc = array($keyword);
+                break;
             case 'manifest-src':
                 $this->manifestSrc = array($keyword);
-                break;
-            case 'object-src':
-                $this->objectSrc = array($keyword);
                 break;
             case 'media-src':
                 $this->mediaSrc = array($keyword);
                 break;
-            case 'frame-src':
-                $this->frameSrc = array($keyword);
+            case 'object-src':
+                $this->objectSrc = array($keyword);
+                break;
+            case 'script-src':
+                $this->scriptSrc = array($keyword);
+                break;
+            case 'style-src':
+                $this->styleSrc = array($keyword);
                 break;
             case 'worker-src':
                 $this->workerSrc = array($keyword);
@@ -540,24 +578,12 @@ class ContentSecurityPolicy
     {
         $directives = array();
         $directives[] = 'default-src ' . implode(' ', $this->defaultSrc) . ';';
-        if ($this->scriptSrc !== $this->defaultSrc) {
-            if (count($this->scriptSrc) > 0) {
-                $directives[] = 'script-src ' . implode(' ', $this->scriptSrc) . ';';
-            }
-        }
+        
+        /* These inherit from default if empty */
+        
         if ($this->connectSrc !== $this->defaultSrc) {
             if (count($this->connectSrc) > 0) {
                 $directives[] = 'connect-src ' . implode(' ', $this->connectSrc) . ';';
-            }
-        }
-        if ($this->imgSrc !== $this->defaultSrc) {
-            if (count($this->imgSrc) > 0) {
-                $directives[] = 'img-src ' . implode(' ', $this->imgSrc) . ';';
-            }
-        }
-        if ($this->styleSrc !== $this->defaultSrc) {
-            if (count($this->styleSrc) > 0) {
-                $directives[] = 'style-src ' . implode(' ', $this->styleSrc) . ';';
             }
         }
         if ($this->fontSrc !== $this->defaultSrc) {
@@ -565,14 +591,19 @@ class ContentSecurityPolicy
                 $directives[] = 'font-src ' . implode(' ', $this->fontSrc) . ';';
             }
         }
+        if ($this->frameSrc !== $this->defaultSrc) {
+            if (count($this->frameSrc) > 0) {
+                $directives[] = 'frame-src ' . implode(' ', $this->frameSrc) . ';';
+            }
+        }
+        if ($this->imgSrc !== $this->defaultSrc) {
+            if (count($this->imgSrc) > 0) {
+                $directives[] = 'img-src ' . implode(' ', $this->imgSrc) . ';';
+            }
+        }
         if ($this->manifestSrc !== $this->defaultSrc) {
             if (count($this->manifestSrc) > 0) {
                 $directives[] = 'manifest-src ' . implode(' ', $this->manifestSrc) . ';';
-            }
-        }
-        if ($this->objectSrc !== $this->defaultSrc) {
-            if (count($this->objectSrc) > 0) {
-                $directives[] = 'object-src ' . implode(' ', $this->objectSrc) . ';';
             }
         }
         if ($this->mediaSrc !== $this->defaultSrc) {
@@ -580,25 +611,31 @@ class ContentSecurityPolicy
                 $directives[] = 'media-src ' . implode(' ', $this->mediaSrc) . ';';
             }
         }
-        if ($this->frameSrc !== $this->defaultSrc) {
-            if (count($this->frameSrc) > 0) {
-                $directives[] = 'frame-src ' . implode(' ', $this->frameSrc) . ';';
+        if ($this->objectSrc !== $this->defaultSrc) {
+            if (count($this->objectSrc) > 0) {
+                $directives[] = 'object-src ' . implode(' ', $this->objectSrc) . ';';
             }
         }
+        if ($this->scriptSrc !== $this->defaultSrc) {
+            if (count($this->scriptSrc) > 0) {
+                $directives[] = 'script-src ' . implode(' ', $this->scriptSrc) . ';';
+            }
+        }
+        if ($this->styleSrc !== $this->defaultSrc) {
+            if (count($this->styleSrc) > 0) {
+                $directives[] = 'style-src ' . implode(' ', $this->styleSrc) . ';';
+            }
+        }        
         if ($this->workerSrc !== $this->defaultSrc) {
             if (count($this->workerSrc) > 0) {
                 $directives[] = 'worker-src ' . implode(' ', $this->workerSrc) . ';';
             }
         }
-        if (count($this->sandbox) > 0) {
-            $directives[] = 'sandbox ' . implode(' ', $this->sandbox) . ';';
-        }
-        if (count($this->formAction) > 0) {
-            $directives[] = 'form-action ' . implode(' ', $this->formAction) . ';';
-        }
-        if (count($this->frameAncestors) > 0) {
-            $directives[] = 'frame-ancestors ' . implode(' ', $this->frameAncestors) . ';';
-        }
+        
+        /* These do not inherit from default if empty */
+        
+        // missing baseURI
+        
         if (count($this->pluginTypes) > 0) {
             $bool = false;
             if (count($this->objectSrc) === 0) {
@@ -614,6 +651,16 @@ class ContentSecurityPolicy
                 $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
             }
         }
+        if (count($this->sandbox) > 0) {
+            $directives[] = 'sandbox ' . implode(' ', $this->sandbox) . ';';
+        }
+        if (count($this->formAction) > 0) {
+            $directives[] = 'form-action ' . implode(' ', $this->formAction) . ';';
+        }
+        if (count($this->frameAncestors) > 0) {
+            $directives[] = 'frame-ancestors ' . implode(' ', $this->frameAncestors) . ';';
+        }
+        
         if (! is_null($this->reportUri)) {
             $h = 'report-uri';
             if ($this->reportOnly) {
