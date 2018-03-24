@@ -15,8 +15,9 @@ namespace AWonderPHP\ContentSecurityPolicy;
 /**
  * An implementation of Content Security Policy.
  *
- * Based on the specification at https://content-security-policy.com/ but is bit more restrictive
- * with the nonce, where it requires the nonce be base64 encoded or hex encoded string.
+ * Based on the specification at
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy but is
+ * bit more restrictive with the nonce, where it requires the nonce be base64 encoded or hex encoded string.
  *
  */
 class ContentSecurityPolicy
@@ -32,9 +33,11 @@ class ContentSecurityPolicy
         'img-src',
         'connect-src',
         'font-src',
+        'manifest-src',
         'object-src',
         'media-src',
-        'child-src',
+        'frame-src',
+        'worker-src',
         'sandbox',
         'form-action',
         'frame-ancestors',
@@ -87,6 +90,13 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $fontSrc = array();
+    
+    /**
+     * Defines valid sources for manifest.
+     *
+     * @var array
+     */
+    protected $manifestSrc = array();
     
     /**
      * Defines valid sources of plugins, eg <object>, <embed> or <applet>.
@@ -148,12 +158,19 @@ class ContentSecurityPolicy
     /* CSP Level 2 additions */
     
     /**
-     * Defines valid sources for web workers and nested browsing contexts loaded using
-     * elements such as <frame> and <iframe>
+     * Defines valid sources for nested browsing contexts loaded using elements such as
+     * <frame> and <iframe>
      *
      * @var array
      */
-    protected $childSrc = array();
+    protected $frameSrc = array();
+    
+    /**
+     * Defines valid sources for web workers
+     *
+     * @var array
+     */
+    protected $workerSrc = array();
     
     /**
      * Defines valid sources that can be used as a HTML <form> action.
@@ -203,6 +220,18 @@ class ContentSecurityPolicy
             case '\'self\'':
                 $policy = ('\'self\'');
                 break;
+            case 'unsafe-inline':
+                $policy = ('\'unsafe-inline\'');
+                break;
+            case '\'unsafe-inline\'':
+                $policy = ('\'unsafe-inline\'');
+                break;
+            case 'unsafe-eval':
+                $policy = ('\'unsafe-eval\'');
+                break;
+            case '\'unsafe-eval\'':
+                $policy = ('\'unsafe-eval\'');
+                break;
         }
         return $policy;
     }//end adjustPolicy()
@@ -241,14 +270,20 @@ class ContentSecurityPolicy
             case 'font-src':
                 $this->fontSrc = array($keyword);
                 break;
+            case 'manifest-src':
+                $this->manifestSrc = array($keyword);
+                break;
             case 'object-src':
                 $this->objectSrc = array($keyword);
                 break;
             case 'media-src':
                 $this->mediaSrc = array($keyword);
                 break;
-            case 'child-src':
-                $this->childSrc = array($keyword);
+            case 'frame-src':
+                $this->frameSrc = array($keyword);
+                break;
+            case 'worker-src':
+                $this->workerSrc = array($keyword);
                 break;
             case 'form-action':
                 $this->formAction = array($keyword);
@@ -273,23 +308,23 @@ class ContentSecurityPolicy
      */
     protected function addUnsafe($directive, $unsafe): bool
     {
-        if (! in_array($unsafe, array('unsafe-inline', 'unsafe-eval'))) {
+        if (! in_array($unsafe, array('\'unsafe-inline\'', '\'unsafe-eval\''))) {
             return false;
         }
         switch ($unsafe) {
-            case 'unsafe-inline':
+            case '\'unsafe-inline\'':
                 if ($directive === 'script-src') {
-                    $this->scriptSrc[] = 'unsafe-inline';
+                    $this->scriptSrc[] = '\'unsafe-inline\'';
                     return true;
                 }
                 if ($directive === 'style-src') {
-                    $this->styleSrc[] = 'unsafe-inline';
+                    $this->styleSrc[] = '\'unsafe-inline\'';
                     return true;
                 }
                 break;
             default:
                 if ($directive === 'script-src') {
-                    $this->scriptSrc[] = 'unsafe-eval';
+                    $this->scriptSrc[] = '\'unsafe-eval\'';
                     return true;
                 }
         }
@@ -392,7 +427,7 @@ class ContentSecurityPolicy
      * Adds a nonce to script or style policy.
      *
      * @param string $directive The directive to add the nonce to.
-     * @param string $nonce     The hex or base64 nonce to use.
+     * @param string $nonce     The base64 nonce to use.
      *
      * @return bool True on success, False on failure
      */
@@ -400,10 +435,12 @@ class ContentSecurityPolicy
     {
         // FIXME - make sure it makes sense to add
         $nonce = trim($nonce);
-        if (! ctype_xdigit($nonce)) {
-            if (base64_encode(base64_decode($nonce)) !== $nonce) {
-                throw InvalidArgumentException::badNonce($nonce);
-            }
+        $end = strtolower(substr($nonce, -1));
+        if($end !== "=") {
+            throw InvalidArgumentException::badNonce($nonce);
+        }
+        if (base64_encode(base64_decode($nonce, true)) !== $nonce) {
+            throw InvalidArgumentException::badNonce($nonce);
         }
         $directive = trim(strtolower($directive));
         if (! in_array($directive, array('script-src', 'style-src'))) {
@@ -429,12 +466,17 @@ class ContentSecurityPolicy
     /**
      * Adds script sha256. Throws exception if invalid.
      *
-     * @param string $hash The sha256 sum to allow.
+     * @param string $algo The hash algorithm.
+     * @param string $hash The hash.
      *
      * @return bool
      */
-    public function addInlineScriptHash($hash): bool
+    public function addInlineScriptHash(string $algo, string $hash): bool
     {
+        $algo = trim(strtolower($algo));
+        if(! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
+            throw InvalidArgumentException::badAlgo($algo);
+        }
         if (! $this->checkInlineScriptsAllowed()) {
             return false;
         }
@@ -445,10 +487,21 @@ class ContentSecurityPolicy
         if (base64_encode(base64_decode($hash)) !== $hash) {
             throw InvalidArgumentException::badHash();
         }
-        if (strlen($hash) !== 44) {
+        switch($algo) {
+            case 'sha384':
+                $hashLength = 64;
+                break;
+            case 'sha512':
+                $hashLength = 88;
+                break;
+            default:
+                $hashLength = 44;
+                break;
+        }
+        if (strlen($hash) !== $hashLength) {
             throw InvalidArgumentException::badHash();
         }
-        $policy = '\'sha256-' . $hash . '\'';
+        $policy = '\'' . $algo . '-' . $hash . '\'';
         $this->scriptSrc[] = $policy;
         return true;
     }//end addInlineScriptHash()
@@ -512,6 +565,11 @@ class ContentSecurityPolicy
                 $directives[] = 'font-src ' . implode(' ', $this->fontSrc) . ';';
             }
         }
+        if ($this->manifestSrc !== $this->defaultSrc) {
+            if (count($this->manifestSrc) > 0) {
+                $directives[] = 'manifest-src ' . implode(' ', $this->manifestSrc) . ';';
+            }
+        }
         if ($this->objectSrc !== $this->defaultSrc) {
             if (count($this->objectSrc) > 0) {
                 $directives[] = 'object-src ' . implode(' ', $this->objectSrc) . ';';
@@ -522,9 +580,14 @@ class ContentSecurityPolicy
                 $directives[] = 'media-src ' . implode(' ', $this->mediaSrc) . ';';
             }
         }
-        if ($this->childSrc !== $this->defaultSrc) {
-            if (count($this->childSrc) > 0) {
-                $directives[] = 'child-src ' . implode(' ', $this->childSrc) . ';';
+        if ($this->frameSrc !== $this->defaultSrc) {
+            if (count($this->frameSrc) > 0) {
+                $directives[] = 'frame-src ' . implode(' ', $this->frameSrc) . ';';
+            }
+        }
+        if ($this->workerSrc !== $this->defaultSrc) {
+            if (count($this->workerSrc) > 0) {
+                $directives[] = 'worker-src ' . implode(' ', $this->workerSrc) . ';';
             }
         }
         if (count($this->sandbox) > 0) {

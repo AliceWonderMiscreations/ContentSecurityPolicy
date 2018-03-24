@@ -59,20 +59,32 @@ class InvalidArgumentException extends \InvalidArgumentException
     public static function badNonce(string $arg)
     {
         return new self(sprintf(
-            'The nonce must be a hex or base64 encoded string. You supplied \'%s\'.',
+            'The nonce must be a base64 encoded string. You supplied \'%s\'.',
             $arg
         ));
     }//end badNonce()
     
     /**
-     * Exception message when the supplied hash is not valid
+     * Exception message when the supplied hash algo is not valid.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function badAlgo()
+    {
+        return new self(sprintf(
+            'The hash algorithm must be sha256, sha384, or sha512.'
+        ));
+    }//end badAlgo()
+    
+    /**
+     * Exception message when the supplied hash digest is not valid.
      *
      * @return \InvalidArgumentException
      */
     public static function badHash()
     {
         return new self(sprintf(
-            'The hash must be a valid hex or base64 encoded sha256 hash.'
+            'The hash must be a valid hex or base64 encoded hash.'
         ));
     }//end badHash()
 }//end class
