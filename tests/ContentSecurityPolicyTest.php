@@ -198,7 +198,7 @@ final class ContentSecurityPolicyTest extends TestCase
      */
     public function testDefaultNoneFrameSelf(): void
     {
-        $expected = 'default-src \'none\'; frame-src \'self\';';
+        $expected = 'default-src \'none\'; child-src \'self\'; frame-src \'self\'; worker-src \'none\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addDirectivePolicy('frame-src', 'self');
         $actual = $csp->buildHeader();
@@ -213,7 +213,7 @@ final class ContentSecurityPolicyTest extends TestCase
      */
     public function testDefaultNoneWorkerSelf(): void
     {
-        $expected = 'default-src \'none\'; worker-src \'self\';';
+        $expected = 'default-src \'none\'; child-src \'self\'; frame-src \'none\'; worker-src \'self\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addDirectivePolicy('worker-src', 'self');
         $actual = $csp->buildHeader();
@@ -251,8 +251,8 @@ final class ContentSecurityPolicyTest extends TestCase
     }//end testDefaultNoneFrameAncestorsSelf()
 
     /**
-     * Tests generation of nonce. Should be 8-byte when argument null, 8-byte when argument
-     * is 6, 12 byte when argument is 12. (2 hex = 1 byte)
+     * Tests generation of nonce. Should be 16-byte when argument null, 16-byte when argument
+     * is < 16, > 16 bytes byte when argument is >16. (2 hex = 1 byte)
      *
      * @return void
      */
@@ -262,17 +262,17 @@ final class ContentSecurityPolicyTest extends TestCase
         $raw = base64_decode($nonce);
         $hex = bin2hex($raw);
         $len = strlen($hex);
-        $this->assertEquals(16, $len);
+        $this->assertEquals(32, $len);
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce(6);
         $raw = base64_decode($nonce);
         $hex = bin2hex($raw);
         $len = strlen($hex);
-        $this->assertEquals(16, $len);
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce(12);
+        $this->assertEquals(32, $len);
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce(24);
         $raw = base64_decode($nonce);
         $hex = bin2hex($raw);
         $len = strlen($hex);
-        $this->assertEquals(24, $len);
+        $this->assertEquals(48, $len);
     }//end testGenerateNonce()
     
     /**
@@ -289,7 +289,8 @@ final class ContentSecurityPolicyTest extends TestCase
         $csp->addNonce('script-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptNonceBase64()
+
     
     /**
      * Test style with base64 nonce
@@ -305,7 +306,8 @@ final class ContentSecurityPolicyTest extends TestCase
         $csp->addNonce('style-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testStyleNonceBase64()
+
     
     /**
      * Test script hash with base64 hash
@@ -320,10 +322,11 @@ final class ContentSecurityPolicyTest extends TestCase
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
-        $csp->addInlineScriptHash('sha256', $hash);
+        $csp->addScriptHash('sha256', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptHashSha256Base64()
+
     
     /**
      * Test script hash with hex hash
@@ -339,10 +342,11 @@ final class ContentSecurityPolicyTest extends TestCase
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
-        $csp->addInlineScriptHash('sha256', $hash);
+        $csp->addScriptHash('sha256', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptHashSha256Hex()
+
     
     /**
      * Test script hash sha384 with base64 hash
@@ -357,10 +361,11 @@ final class ContentSecurityPolicyTest extends TestCase
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
-        $csp->addInlineScriptHash('sha384', $hash);
+        $csp->addScriptHash('sha384', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptHashSha384Base64()
+
     
     /**
      * Test script hash 384 with hex hash
@@ -376,10 +381,11 @@ final class ContentSecurityPolicyTest extends TestCase
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
-        $csp->addInlineScriptHash('sha384', $hash);
+        $csp->addScriptHash('sha384', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptHashSha384Hex()
+
     
     /**
      * Test script hash sha384 with base64 hash
@@ -394,10 +400,11 @@ final class ContentSecurityPolicyTest extends TestCase
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
-        $csp->addInlineScriptHash('sha512', $hash);
+        $csp->addScriptHash('sha512', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptHashSha512Base64()
+
     
     /**
      * Test script hash 384 with hex hash
@@ -413,10 +420,11 @@ final class ContentSecurityPolicyTest extends TestCase
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addDirectivePolicy('object-src', 'none');
-        $csp->addInlineScriptHash('sha512', $hash);
+        $csp->addScriptHash('sha512', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptHashSha512Hex()
+
     
     
     
@@ -436,7 +444,8 @@ final class ContentSecurityPolicyTest extends TestCase
         $csp->addDirectivePolicy('script-src', 'unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptUnsafeInline()
+
     
     /**
      * Test script with unsafe eval
@@ -451,7 +460,8 @@ final class ContentSecurityPolicyTest extends TestCase
         $csp->addDirectivePolicy('script-src', 'unsafe-eval');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptUnsafeEval()
+
     
     /**
      * Test style with unsafe inline
@@ -466,7 +476,41 @@ final class ContentSecurityPolicyTest extends TestCase
         $csp->addDirectivePolicy('style-src', 'unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testStyleUnsafeInline()
+
+
+    /**
+     * Try adding unsafe after adding nonce
+     *
+     * @return null
+     */
+    public function testScriptAddNonceThenInline(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+        $csp->addNonce('script-src', $nonce);
+        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testScriptAddNonceThenInline()
+
+    
+    /**
+     * Try adding unsafe before adding nonce
+     *
+     * @return null
+     */
+    public function testScriptAddInlineThenNonce(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
+        $csp->addNonce('script-src', $nonce);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testScriptAddInlineThenNonce()
 }//end class
 
 ?>

@@ -59,7 +59,7 @@ class InvalidArgumentException extends \InvalidArgumentException
     public static function badNonce(string $arg)
     {
         return new self(sprintf(
-            'The nonce must be a base64 encoded string. You supplied \'%s\'.',
+            'The nonce must be a 128-bit or larger nonce encoded as a base64 string. You supplied \'%s\'.',
             $arg
         ));
     }//end badNonce()

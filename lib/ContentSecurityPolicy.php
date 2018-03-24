@@ -179,8 +179,8 @@ class ContentSecurityPolicy
         'allow-pointer-lock',
         'allow-popups',
         'allow-popups-to-escape-sandbox',
-        'allow-presentation',        
-        'allow-same-origin',        
+        'allow-presentation',
+        'allow-same-origin',
         'allow-scripts',
         'allow-top-navigation'
         );
@@ -223,16 +223,6 @@ class ContentSecurityPolicy
      * @var bool
      */
     protected $reportOnly = false;
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     /**
      * Adjust the policy to add single upquote where needed
@@ -352,10 +342,22 @@ class ContentSecurityPolicy
         switch ($unsafe) {
             case '\'unsafe-inline\'':
                 if ($directive === 'script-src') {
+                    foreach ($this->scriptSrc as $policy) {
+                        $test = substr($policy, 0, 7);
+                        if ($test === '\'nonce-') {
+                            return true;
+                        }
+                    }
                     $this->scriptSrc[] = '\'unsafe-inline\'';
                     return true;
                 }
                 if ($directive === 'style-src') {
+                    foreach ($this->styleSrc as $policy) {
+                        $test = substr($policy, 0, 7);
+                        if ($test === '\'nonce-') {
+                            return true;
+                        }
+                    }
                     $this->styleSrc[] = '\'unsafe-inline\'';
                     return true;
                 }
@@ -458,6 +460,27 @@ class ContentSecurityPolicy
         return false;
     }//end addDirectivePolicy()
 
+    /**
+     * Verifies that we have a valid nonce.
+     *
+     * @param string $nonce the nonce to test.
+     *
+     * @return bool True when valid, False when invalid
+     */
+    public function validateNonce(string $nonce): bool
+    {
+        if (base64_encode(base64_decode($nonce, true)) !== $nonce) {
+            return false;
+        }
+        if (ctype_xdigit($nonce)) {
+            return false;
+        }
+        $len = strlen($nonce);
+        if ($len < 24) {
+            return false;
+        }
+        return true;
+    }//end validateNonce()
 
 
     
@@ -471,13 +494,8 @@ class ContentSecurityPolicy
      */
     public function addNonce($directive, string $nonce)
     {
-        // FIXME - make sure it makes sense to add
         $nonce = trim($nonce);
-        $end = strtolower(substr($nonce, -1));
-        if($end !== "=") {
-            throw InvalidArgumentException::badNonce($nonce);
-        }
-        if (base64_encode(base64_decode($nonce, true)) !== $nonce) {
+        if (! $this->validateNonce($nonce)) {
             throw InvalidArgumentException::badNonce($nonce);
         }
         $directive = trim(strtolower($directive));
@@ -487,32 +505,43 @@ class ContentSecurityPolicy
         $policy = '\'nonce-' . $nonce . '\'';
         switch ($directive) {
             case 'script-src':
-                if (! $this->checkInlineScriptsAllowed()) {
-                    return false;
+                if (in_array($policy, $this->scriptSrc)) {
+                    return true;
                 }
-                $this->scriptSrc[] = $policy;
+                $n = array_search('\'unsafe-inline\'', $this->scriptSrc);
+                if ($n === false) {
+                    $this->scriptSrc[] = $policy;
+                } else {
+                    $this->scriptSrc[$n] = $policy;
+                }
                 break;
             default:
-                if (! $this->checkInlineStyleAllowed()) {
-                    return false;
+                if (in_array($policy, $this->styleSrc)) {
+                    return true;
                 }
-                $this->styleSrc[] = $policy;
+                $n = array_search('\'unsafe-inline\'', $this->styleSrc);
+                if ($n === false) {
+                    $this->styleSrc[] = $policy;
+                } else {
+                    $this->styleSrc[$n] = $policy;
+                }
+                break;
         }
         return true;
     }//end addNonce()
     
     /**
-     * Adds script sha256. Throws exception if invalid.
+     * Adds script hash. Throws exception if invalid.
      *
      * @param string $algo The hash algorithm.
      * @param string $hash The hash.
      *
      * @return bool
      */
-    public function addInlineScriptHash(string $algo, string $hash): bool
+    public function addScriptHash(string $algo, string $hash): bool
     {
         $algo = trim(strtolower($algo));
-        if(! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
+        if (! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
             throw InvalidArgumentException::badAlgo($algo);
         }
         if (! $this->checkInlineScriptsAllowed()) {
@@ -525,7 +554,7 @@ class ContentSecurityPolicy
         if (base64_encode(base64_decode($hash)) !== $hash) {
             throw InvalidArgumentException::badHash();
         }
-        switch($algo) {
+        switch ($algo) {
             case 'sha384':
                 $hashLength = 64;
                 break;
@@ -542,7 +571,7 @@ class ContentSecurityPolicy
         $policy = '\'' . $algo . '-' . $hash . '\'';
         $this->scriptSrc[] = $policy;
         return true;
-    }//end addInlineScriptHash()
+    }//end addScriptHash()
 
 
     /**
@@ -552,7 +581,8 @@ class ContentSecurityPolicy
      * predictable, it just can't be reused with the same secret. With CSP, it can not be
      * predictable so it is not something that can just be incremented after each use.
      *
-     * If a nonce less than 8 bytes is requested, it rejects it and generated 8 bytes.
+     * If a nonce less than 16 bytes is requested, it rejects it and generated 16 bytes
+     * per https://w3c.github.io/webappsec-csp/#security-considerations
      *
      * This function also can produce a suitable CSRF token.
      *
@@ -560,10 +590,10 @@ class ContentSecurityPolicy
      *
      * @return string A base64 encoded random nonce
      */
-    public static function generateNonce(int $bytes = 8): string
+    public static function generateNonce(int $bytes = 16): string
     {
-        if ($bytes < 8) {
-            $bytes = 8;
+        if ($bytes < 16) {
+            $bytes = 16;
         }
         $random = random_bytes($bytes);
         return base64_encode($random);
@@ -581,6 +611,31 @@ class ContentSecurityPolicy
         
         /* These inherit from default if empty */
         
+        /* child-src is deprecated but some browsers may still need it */
+        $childSrc = array();
+        foreach ($this->frameSrc as $policy) {
+            $childSrc[] = $policy;
+        }
+        foreach ($this->workerSrc as $policy) {
+            if (! in_array($policy, $childSrc)) {
+                $childSrc[] = $policy;
+            }
+        }
+        if ($childSrc !== $this->defaultSrc) {
+            if (count($childSrc) > 0) {
+                // check for empty frameSrc
+                if (count($this->frameSrc) === 0) {
+                    $this->frameSrc[] = '\'none\'';
+                }
+                // check for empty workerSrc
+                if (count($this->workerSrc) === 0) {
+                    $this->workerSrc[] = '\'none\'';
+                }
+                $directives[] = 'child-src ' . implode(' ', $childSrc) . ';';
+            }
+        }
+        
+        
         if ($this->connectSrc !== $this->defaultSrc) {
             if (count($this->connectSrc) > 0) {
                 $directives[] = 'connect-src ' . implode(' ', $this->connectSrc) . ';';
@@ -591,11 +646,29 @@ class ContentSecurityPolicy
                 $directives[] = 'font-src ' . implode(' ', $this->fontSrc) . ';';
             }
         }
-        if ($this->frameSrc !== $this->defaultSrc) {
-            if (count($this->frameSrc) > 0) {
-                $directives[] = 'frame-src ' . implode(' ', $this->frameSrc) . ';';
+        
+        // special case due to deprecated childSrc
+        $directiveAdded = false;
+        if (count($childSrc) > 0) {
+            if (count($this->frameSrc) === 0) {
+                //explicitly set to default
+                $directives[] = 'frame-src ' . implode(' ', $this->defaultSrc) . ';';
+                $directiveAdded = true;
+            } elseif ($this->frameSrc === $this->defaultSrc) {
+                //explicitly set to default
+                $directives[] = 'frame-src ' . implode(' ', $this->defaultSrc) . ';';
+                $directiveAdded = true;
             }
         }
+        if (! $directiveAdded) {
+            if ($this->frameSrc !== $this->defaultSrc) {
+                if (count($this->frameSrc) > 0) {
+                    $directives[] = 'frame-src ' . implode(' ', $this->frameSrc) . ';';
+                }
+            }
+        }
+        // end special case
+        
         if ($this->imgSrc !== $this->defaultSrc) {
             if (count($this->imgSrc) > 0) {
                 $directives[] = 'img-src ' . implode(' ', $this->imgSrc) . ';';
@@ -625,12 +698,29 @@ class ContentSecurityPolicy
             if (count($this->styleSrc) > 0) {
                 $directives[] = 'style-src ' . implode(' ', $this->styleSrc) . ';';
             }
-        }        
-        if ($this->workerSrc !== $this->defaultSrc) {
-            if (count($this->workerSrc) > 0) {
-                $directives[] = 'worker-src ' . implode(' ', $this->workerSrc) . ';';
+        }
+        
+        // special case due to deprecated childSrc
+        $directiveAdded = false;
+        if (count($childSrc) > 0) {
+            if (count($this->workerSrc) === 0) {
+                //explicitly set to default
+                $directives[] = 'worker-src ' . implode(' ', $this->defaultSrc) . ';';
+                $directiveAdded = true;
+            } elseif ($this->workerSrc === $this->defaultSrc) {
+                //explicitly set to default
+                $directives[] = 'worker-src ' . implode(' ', $this->defaultSrc) . ';';
+                $directiveAdded = true;
             }
         }
+        if (! $directiveAdded) {
+            if ($this->workerSrc !== $this->defaultSrc) {
+                if (count($this->workerSrc) > 0) {
+                    $directives[] = 'worker-src ' . implode(' ', $this->workerSrc) . ';';
+                }
+            }
+        }
+        // end special case
         
         /* These do not inherit from default if empty */
         
