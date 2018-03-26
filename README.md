@@ -71,6 +71,55 @@ keyword `'none'` by default in this class. I recommend using the keyword
 `'self'` as a starting point for that directive in actual use but it would not
 be responsible of me to set that as the default in this class.
 
+For specifics on the individual directives, please see the
+[Mozilla MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy).
+That is what I am using as the primary guide to the writing of this class, the
+W3C documentation is good too but the Mozilla documentation is more concise and
+details the actual implementation by a popular browser vendor that has a very
+open development process.
+
+
+AWonderPHP CSP Class Implementation
+-----------------------------------
+
+With the CSP class here, the CSP header is generated for you using public
+class functions that modify the defined directive policies within the class.
+
+The `default-src` directive is treated special. It __MUST__ have a defined
+policy and that policy can only be set by the constructor, during class
+instantiation.
+
+It is defined as the first argument when calling the class:
+
+    use \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy as CSP;
+    $csp = new CSP('self');
+
+You can define more than one parameter in the same string to the constructor,
+if you need to:
+
+    $csp = new CSP('self *.cdn.example.com');
+
+Note that I did not put `self` in escaped upquotes. You can if you prefer:
+
+    $csp = new CSP('\'self\' *.cdn.example.com');
+
+or
+
+    $csp = new CSP("'self' *.cdn.example.com");
+
+However, the class does not require it. It identifies when a parameter is a
+keyword that needs single quotes around it when the header is sent.
+
+When no argument (or `null`) is fed to the constructor, several relatively safe
+defaults kick in.
+
+For fetch directives, the `default-src` directive defaults to `'none'` and
+`connect-src`, `img-src`, `media-src`, `script-src`, and `style-src` all will
+default to `'self'`.
+
+Please note those defaults *only* take place when the `default-src` directive
+is not explicitly set in the constructor. Explicitly setting `default-src` to
+`'none'` will __not__ result in those other defaults being set.
 
 
 
@@ -81,6 +130,43 @@ be responsible of me to set that as the default in this class.
 
 
 
+
+
+
+
+
+
+
+
+
+
+Will Not Implement
+------------------
+
+The following CSP directives will not be implemented by this class unless I can
+be given a very good use case for doing so:
+
+[`block-all-mixed-content`](#the-block-all-mixed-content-directive)
+[`referrer`](#the-referrer-directive)
+
+
+### The `block-all-mixed-content` Directive
+
+This causes the browser to block any HTTP resources when the page is an HTTPS
+page. That actually is a good thing, and it really should be the browser
+default.
+
+However it is a duplicate function. You can already set the policy for each
+fetch type directive to only include secure resources.
+
+### The `referrer` Directive
+
+This allows you to specify information that should be sent with the HTTP
+`referer` (sic) header.
+
+It is considered obsolete and should not be used, use the
+[`Referrer-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
+header instead, which is a separate header from CSP.
 
 
 

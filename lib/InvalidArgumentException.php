@@ -18,6 +18,103 @@ namespace AWonderPHP\ContentSecurityPolicy;
 class InvalidArgumentException extends \InvalidArgumentException
 {
     /**
+     * Exception message when default-src is specified outside the constructor.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidDefaultSrc()
+    {
+        return new self(sprintf(
+            'The default-src directive can only be set in the condtructor.'
+        ));
+    }//end invalidDefaultSrc()
+
+    
+    /**
+     * Exception message when child-src is specified.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidChildSrc()
+    {
+        return new self(sprintf(
+            'The deprecated child-src directive is automatically generated and can not be manually set.'
+        ));
+    }//end invalidChildSrc()
+
+    
+    /**
+     * Exception message when an invalid fetch directive is specified
+     *
+     * @param string $arg The supplied invalid directive.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidFetchDirective(string $arg)
+    {
+        return new self(sprintf(
+            'The specified directive \'%s\' is not a valid CSP fetch directive.',
+            $arg
+        ));
+    }//end invalidFetchDirective()
+
+    
+    /**
+     * Exception message when an invalid scheme source is specified
+     *
+     * @param string $arg The supplied invalid scheme source.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidFetchScheme(string $arg)
+    {
+        return new self(sprintf(
+            'A scheme-source must be on of \'https:\', \'data\', \'mediastream\', or \'filesystem\'. You supplied %s',
+            $arg
+        ));
+    }//end invalidFetchScheme()
+    
+    /**
+     * Exception message when an invalid hostname is specified
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidHostName()
+    {
+        return new self(sprintf(
+            'A host must be a valid hostname with an optional single * wildcard at the start.'
+        ));
+    }//end invalidHostName()
+
+    
+    /**
+     * Exception message when an invalid host is specified
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidHostSource()
+    {
+        return new self(sprintf(
+            'A host can only include optional protocol, mandatory hostname or IP address, and optional port parameters'
+        ));
+    }//end invalidHostSource()
+
+    
+    /**
+     * Exception message when an invalid host scheme is specified
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidHostScheme()
+    {
+        return new self(sprintf(
+            'A host scheme can only be http or https'
+        ));
+    }//end invalidHostScheme()
+
+
+    
+    /**
      * Exception message when an invalid directive is specified
      *
      * @param string $arg The supplied invalid directive.

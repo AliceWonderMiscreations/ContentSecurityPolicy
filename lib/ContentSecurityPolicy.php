@@ -47,6 +47,24 @@ class ContentSecurityPolicy
     );
     
     /**
+     * Valid CSP Fetch Directives excluding default-src
+     *
+     * @var array
+     */
+    protected $fetchDirectives = array(
+        'connect-src',
+        'font-src',
+        'frame-src',
+        'img-src',
+        'manifest-src',
+        'media-src',
+        'object-src',
+        'script-src',
+        'style-src',
+        'worker-src'
+    );
+    
+    /**
      * Experimental CSP Directives not yet widely supported.
      *
      * @var array
@@ -234,30 +252,21 @@ class ContentSecurityPolicy
     protected function adjustPolicy($policy)
     {
         $policy = trim($policy);
+        $s = array('/^\'/', '/\'$/');
+        $r = array('', '');
+        $policy = preg_replace($s, $r, $policy);
         $test = strtolower($policy);
         switch ($test) {
             case 'none':
                 $policy = ('\'none\'');
                 break;
-            case '\'none\'':
-                $policy = ('\'none\'');
-                break;
             case 'self':
-                $policy = ('\'self\'');
-                break;
-            case '\'self\'':
                 $policy = ('\'self\'');
                 break;
             case 'unsafe-inline':
                 $policy = ('\'unsafe-inline\'');
                 break;
-            case '\'unsafe-inline\'':
-                $policy = ('\'unsafe-inline\'');
-                break;
             case 'unsafe-eval':
-                $policy = ('\'unsafe-eval\'');
-                break;
-            case '\'unsafe-eval\'':
                 $policy = ('\'unsafe-eval\'');
                 break;
         }
@@ -459,7 +468,212 @@ class ContentSecurityPolicy
         }
         return false;
     }//end addDirectivePolicy()
+    
+    
 
+
+
+
+
+
+    /* new */
+    
+    /**
+     * Determines if the array is set to 'none'.
+     *
+     * @param array $arr The array to check.
+     *
+     * @return bool True if set to 'none', False if not.
+     */
+    protected function checkForNone($arr)
+    {
+        if (isset($arr[0])) {
+            if ($arr[0] === '\'none\'') {
+                return true;
+            }
+        }
+        return false;
+    }//end checkForNone()
+
+    
+    /**
+     * Adds a policy to a directive or sets it if set to 'none'.
+     *
+     * @param string $directive The CSP policy directive.
+     * @param string $policy    The CSP policy parameter.
+     *
+     * @return bool
+     */
+    protected function setPolicyParameter($directive, $policy)
+    {
+        switch ($directive) {
+            case 'default-src':
+                if ($this->checkForNone($this->defaultSrc)) {
+                    $this->defaultSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->defaultSrc)) {
+                        $this->defaultSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'connect-src':
+                if ($this->checkForNone($this->connectSrc)) {
+                    $this->connectSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->connectSrc)) {
+                        $this->connectSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'font-src':
+                if ($this->checkForNone($this->fontSrc)) {
+                    $this->fontSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->fontSrc)) {
+                        $this->fontSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'frame-src':
+                if ($this->checkForNone($this->frameSrc)) {
+                    $this->frameSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->frameSrc)) {
+                        $this->frameSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'img-src':
+                if ($this->checkForNone($this->imgSrc)) {
+                    $this->imgSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->imgSrc)) {
+                        $this->imgSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'manifest-src':
+                if ($this->checkForNone($this->manifestSrc)) {
+                    $this->manifestSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->manifestSrc)) {
+                        $this->manifestSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'media-src':
+                if ($this->checkForNone($this->mediaSrc)) {
+                    $this->mediaSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->mediaSrc)) {
+                        $this->mediaSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'object-src':
+                if ($this->checkForNone($this->objectSrc)) {
+                    $this->objectSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->objectSrc)) {
+                        $this->objectSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'script-src':
+                if ($this->checkForNone($this->scriptSrc)) {
+                    $this->scriptSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->scriptSrc)) {
+                        $this->scriptSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'style-src':
+                if ($this->checkForNone($this->styleSrc)) {
+                    $this->styleSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->styleSrc)) {
+                        $this->styleSrc[] = $policy;
+                    }
+                }
+                break;
+            case 'worker-src':
+                if ($this->checkForNone($this->workerSrc)) {
+                    $this->workerSrc = array($policy);
+                } else {
+                    if (! in_array($policy, $this->workerSrc)) {
+                        $this->workerSrc[] = $policy;
+                    }
+                }
+                break;
+            default:
+                return false;
+                break;
+        }
+        return true;
+    }//end setPolicyParameter()
+
+    
+    /**
+     * Defines the policy to the specified policy keyword. This is for
+     * keywords where the keyword implies first or only policy for directive.
+     *
+     * @param string $directive  The directive to be defined.
+     * @param string $keyword    The policy keyword.
+     *
+     * @return bool
+     */
+    protected function addPolicyKeyword($directive, $keyword): bool
+    {
+        if (! in_array($keyword, array('*', '\'self\'', '\'none\''))) {
+            return false;
+        }
+        switch ($directive) {
+            case 'default-src':
+                $this->defaultSrc = array($keyword);
+                break;
+            case 'connect-src':
+                $this->connectSrc = array($keyword);
+                break;
+            case 'font-src':
+                $this->fontSrc = array($keyword);
+                break;
+            case 'frame-src':
+                $this->frameSrc = array($keyword);
+                break;
+            case 'img-src':
+                $this->imgSrc = array($keyword);
+                break;
+            case 'manifest-src':
+                $this->manifestSrc = array($keyword);
+                break;
+            case 'media-src':
+                $this->mediaSrc = array($keyword);
+                break;
+            case 'object-src':
+                $this->objectSrc = array($keyword);
+                break;
+            case 'script-src':
+                $this->scriptSrc = array($keyword);
+                break;
+            case 'style-src':
+                $this->styleSrc = array($keyword);
+                break;
+            case 'worker-src':
+                $this->workerSrc = array($keyword);
+                break;
+            case 'form-action':
+                $this->formAction = array($keyword);
+                break;
+            case 'frame-ancestors':
+                $this->frameAncestors = array($keyword);
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }//end definePolicy()
+  
     /**
      * Verifies that we have a valid nonce.
      *
@@ -482,7 +696,48 @@ class ContentSecurityPolicy
         return true;
     }//end validateNonce()
 
-
+    /**
+     * Adds script hash. Throws exception if invalid.
+     *
+     * @param string $algo The hash algorithm.
+     * @param string $hash The hash.
+     *
+     * @return bool
+     */
+    public function addScriptHash(string $algo, string $hash): bool
+    {
+        $algo = trim(strtolower($algo));
+        if (! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
+            throw InvalidArgumentException::badAlgo();
+        }
+        if (! $this->checkInlineScriptsAllowed()) {
+            return false;
+        }
+        if (ctype_xdigit($hash)) {
+            $raw = hex2bin($hash);
+            $hash = base64_encode($raw);
+        }
+        if (base64_encode(base64_decode($hash)) !== $hash) {
+            throw InvalidArgumentException::badHash();
+        }
+        switch ($algo) {
+            case 'sha384':
+                $hashLength = 64;
+                break;
+            case 'sha512':
+                $hashLength = 88;
+                break;
+            default:
+                $hashLength = 44;
+                break;
+        }
+        if (strlen($hash) !== $hashLength) {
+            throw InvalidArgumentException::badHash();
+        }
+        $policy = '\'' . $algo . '-' . $hash . '\'';
+        $this->scriptSrc[] = $policy;
+        return true;
+    }//end addScriptHash()
     
     /**
      * Adds a nonce to script or style policy.
@@ -531,47 +786,160 @@ class ContentSecurityPolicy
     }//end addNonce()
     
     /**
-     * Adds script hash. Throws exception if invalid.
+     * Add a host to a directive policy
      *
-     * @param string $algo The hash algorithm.
-     * @param string $hash The hash.
+     * @param string $directive The CSP policy directive.
+     * @param string $url       The host-source policy to set.
      *
      * @return bool
      */
-    public function addScriptHash(string $algo, string $hash): bool
+    protected function addHostPolicy($directive, $url)
     {
-        $algo = trim(strtolower($algo));
-        if (! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
-            throw InvalidArgumentException::badAlgo($algo);
+        if (substr_count($url, ':') === 0) {
+            $parse = array();
+            $testurl = $url;
+            if (function_exists('idn_to_ascii')) {
+                $testurl = strtolower(idn_to_ascii($url));
+            } else {
+                $testurl = strtolower($url);
+            }
+            $ttesturl = preg_replace('/^\*\./', '', $testurl);
+            if (filter_var('http://' . $ttesturl, FILTER_VALIDATE_URL) === false) {
+                throw InvalidArgumentException::invalidHostName();
+            } else {
+                $parse['host'] = $testurl;
+            }
+        } else {
+            $parse = parse_url($url);
         }
-        if (! $this->checkInlineScriptsAllowed()) {
-            return false;
+        if (isset($parse['user'])) {
+            throw InvalidArgumentException::invalidHostSource();
         }
-        if (ctype_xdigit($hash)) {
-            $raw = hex2bin($hash);
-            $hash = base64_encode($raw);
+        if (isset($parse['pass'])) {
+            throw InvalidArgumentException::invalidHostSource();
         }
-        if (base64_encode(base64_decode($hash)) !== $hash) {
-            throw InvalidArgumentException::badHash();
+        if (isset($parse['path'])) {
+            throw InvalidArgumentException::invalidHostSource();
         }
-        switch ($algo) {
-            case 'sha384':
-                $hashLength = 64;
+        if (isset($parse['query'])) {
+            throw InvalidArgumentException::invalidHostSource();
+        }
+        if (isset($parse['fragment'])) {
+            throw InvalidArgumentException::invalidHostSource();
+        }
+        if (! isset($parse['host'])) {
+            throw InvalidArgumentException::invalidHostSource();
+        }
+        if (function_exists('idn_to_ascii')) {
+            $parse['host'] = strtolower(idn_to_ascii($parse['host']));
+        } else {
+            $parse['host'] = strtolower($parse['host']);
+        }
+        $policy = '';
+        if (isset($parse['scheme'])) {
+            $scheme = strtolower($parse['scheme']);
+            if (! in_array($scheme, array('http', 'https'))) {
+                throw InvalidArgumentException::invalidHostScheme();
+            }
+            $policy = $scheme . '://';
+        }
+        $policy .= $parse['host'];
+        if (isset($parse['port'])) {
+            $policy = $policy . ':' . $parse['port'];
+        }
+        return $this->setPolicyParameter($directive, $policy);
+    }//end addHostPolicy()
+
+    
+    /**
+     * Add or create a policy to a fetch directive
+     *
+     * @param string $directive The CSP policy directive.
+     * @param string $policy    The CSP policy parameter.
+     *
+     * @return bool True on success, False on failure
+     */
+    public function addFetchPolicy($directive, $policy)
+    {
+        $directive = trim(strtolower($directive));
+        $policy = $this->adjustPolicy($policy);
+        if ($directive === 'default-src') {
+            throw InvalidArgumentException::invalidDefaultSrc();
+        }
+        if ($directive === 'child-src') {
+            throw InvalidArgumentException::invalidChildSrc();
+        }
+        if (! in_array($directive, $this->fetchDirectives)) {
+            throw InvalidArgumentException::invalidFetchDirective($directive);
+        }
+        $policyType = null;
+        if (in_array($policy, array('\'none\'', '\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''))) {
+            $policyType = 'keyword';
+        }
+        if (is_null($policyType)) {
+            if (substr($policy, -1) === ':') {
+                $policyType = 'scheme';
+            }
+        }
+        if (is_null($policyType)) {
+            $test = strtolower(substr($policy, 0, 7));
+            if (substr($test, 0, 3) === 'sha') {
+                $htype = substr($test, 3, 4);
+                switch ($htype) {
+                    case '256-':
+                        $policyType = 'hash';
+                        break;
+                    case '384-':
+                        $policyType = 'hash';
+                        break;
+                    case '512-':
+                        $policyType = 'hash';
+                        break;
+                }
+            }
+        }
+        if (is_null($policyType)) {
+            $test = strtolower(substr($policy, 0, 6));
+            if ($test === 'nonce') {
+                $policyType = 'nonce';
+            }
+        }
+        
+        switch ($policyType) {
+            case 'keyword':
+                return $this->addPolicyKeyword($directive, $policy);
                 break;
-            case 'sha512':
-                $hashLength = 88;
+            case 'scheme':
+                $policy = strtolower($policy);
+                if (! in_array($policy, array('https:', 'data:', 'mediastream:', 'blob:', 'filesystem:'))) {
+                    throw InvalidArgumentException::invalidFetchScheme($policy);
+                }
+                return $this->setPolicyParameter($directive, $policy);
                 break;
+            case 'hash':
+                $arr = explode('-', $policy);
+                $algo = $arr[0];
+                $hash = $arr[1];
+                if ($directive === 'script-src') {
+                    $this->addScriptHash($algo, $hash);
+                }
+                break;
+            case 'nonce':
+                $arr = explode('-', $policy);
+                $nonce = $arr[1];
+                return $this->addNonce($directive, $nonce);
+              break;
             default:
-                $hashLength = 44;
-                break;
+               //url
+                return $this->addHostPolicy($directive, $policy);
         }
-        if (strlen($hash) !== $hashLength) {
-            throw InvalidArgumentException::badHash();
-        }
-        $policy = '\'' . $algo . '-' . $hash . '\'';
-        $this->scriptSrc[] = $policy;
-        return true;
-    }//end addScriptHash()
+        return false;
+    }//end addFetchPolicy()
+
+
+    
+    
+    
 
 
     /**

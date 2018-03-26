@@ -278,7 +278,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script with base64 nonce
      *
-     * @return null
+     * @return void
      */
     public function testScriptNonceBase64(): void
     {
@@ -295,7 +295,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test style with base64 nonce
      *
-     * @return null
+     * @return void
      */
     public function testStyleNonceBase64(): void
     {
@@ -312,7 +312,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script hash with base64 hash
      *
-     * @return null
+     * @return void
      */
     public function testScriptHashSha256Base64(): void
     {
@@ -331,7 +331,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script hash with hex hash
      *
-     * @return null
+     * @return void
      */
     public function testScriptHashSha256Hex(): void
     {
@@ -351,7 +351,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script hash sha384 with base64 hash
      *
-     * @return null
+     * @return void
      */
     public function testScriptHashSha384Base64(): void
     {
@@ -370,7 +370,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script hash 384 with hex hash
      *
-     * @return null
+     * @return void
      */
     public function testScriptHashSha384Hex(): void
     {
@@ -390,7 +390,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script hash sha384 with base64 hash
      *
-     * @return null
+     * @return void
      */
     public function testScriptHashSha512Base64(): void
     {
@@ -409,7 +409,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script hash 384 with hex hash
      *
-     * @return null
+     * @return void
      */
     public function testScriptHashSha512Hex(): void
     {
@@ -434,7 +434,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script with unsafe inline
      *
-     * @return null
+     * @return void
      */
     public function testScriptUnsafeInline(): void
     {
@@ -450,7 +450,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test script with unsafe eval
      *
-     * @return null
+     * @return void
      */
     public function testScriptUnsafeEval(): void
     {
@@ -466,7 +466,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Test style with unsafe inline
      *
-     * @return null
+     * @return void
      */
     public function testStyleUnsafeInline(): void
     {
@@ -482,7 +482,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Try adding unsafe after adding nonce
      *
-     * @return null
+     * @return void
      */
     public function testScriptAddNonceThenInline(): void
     {
@@ -499,7 +499,7 @@ final class ContentSecurityPolicyTest extends TestCase
     /**
      * Try adding unsafe before adding nonce
      *
-     * @return null
+     * @return void
      */
     public function testScriptAddInlineThenNonce(): void
     {
