@@ -275,67 +275,6 @@ class ContentSecurityPolicy
 
     
     /**
-     * Defines the policy to the specified policy keyword. This is for
-     * keywords where the keyword implies first or only policy for directive.
-     *
-     * @param string $directive  The directive to be defined.
-     * @param string $keyword    The policy keyword.
-     *
-     * @return bool
-     */
-    protected function definePolicy($directive, $keyword): bool
-    {
-        if (! in_array($keyword, array('*', '\'self\'', '\'none\'', 'https:'))) {
-            return false;
-        }
-        switch ($directive) {
-            case 'default-src':
-                $this->defaultSrc = array($keyword);
-                break;
-            case 'connect-src':
-                $this->connectSrc = array($keyword);
-                break;
-            case 'font-src':
-                $this->fontSrc = array($keyword);
-                break;
-            case 'frame-src':
-                $this->frameSrc = array($keyword);
-                break;
-            case 'img-src':
-                $this->imgSrc = array($keyword);
-                break;
-            case 'manifest-src':
-                $this->manifestSrc = array($keyword);
-                break;
-            case 'media-src':
-                $this->mediaSrc = array($keyword);
-                break;
-            case 'object-src':
-                $this->objectSrc = array($keyword);
-                break;
-            case 'script-src':
-                $this->scriptSrc = array($keyword);
-                break;
-            case 'style-src':
-                $this->styleSrc = array($keyword);
-                break;
-            case 'worker-src':
-                $this->workerSrc = array($keyword);
-                break;
-            case 'form-action':
-                $this->formAction = array($keyword);
-                break;
-            case 'frame-ancestors':
-                $this->frameAncestors = array($keyword);
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }//end definePolicy()
-
-    
-    /**
      * Adds unsafe-inline or unsafe-eval to script/style directive.
      *
      * @param string $directive The directive to be defined.
@@ -432,42 +371,7 @@ class ContentSecurityPolicy
     }//end checkInlineStyleAllowed()
 
     
-    /**
-     * Add or create a policy to the specified directive
-     *
-     * @param string $directive The CSP directive to apply the policy to.
-     * @param string $policy    The policy to apply to the CSP directive.
-     *
-     * @return bool True on success, False on failure
-     */
-    public function addDirectivePolicy(string $directive, string $policy): bool
-    {
-        $directive = trim(strtolower($directive));
-        $policy = $this->adjustPolicy($policy);
-        if (! in_array($directive, $this->validDirectives)) {
-            throw InvalidArgumentException::invalidDirective($directive);
-        }
-        switch ($directive) {
-            case 'sandbox':
-                if (! in_array($policy, $this->validSandboxValues)) {
-                    throw InvalidArgumentException::invalidSandboxPolicy($policy);
-                }
-                if (! in_array($policy, $this->sandbox)) {
-                    $this->sandbox[] = $policy;
-                }
-                return true;
-                break;
-            default:
-                if ($this->definePolicy($directive, $policy)) {
-                    return true;
-                }
-                if ($this->addUnsafe($directive, $policy)) {
-                    return true;
-                }
-                break;
-        }
-        return false;
-    }//end addDirectivePolicy()
+    
     
     
 
@@ -625,7 +529,7 @@ class ContentSecurityPolicy
      */
     protected function addPolicyKeyword($directive, $keyword): bool
     {
-        if (! in_array($keyword, array('*', '\'self\'', '\'none\''))) {
+        if (! in_array($keyword, array('\'self\'', '\'none\''))) {
             return false;
         }
         switch ($directive) {
@@ -672,7 +576,8 @@ class ContentSecurityPolicy
                 return false;
         }
         return true;
-    }//end definePolicy()
+    }//end addPolicyKeyword()
+
   
     /**
      * Verifies that we have a valid nonce.
@@ -795,6 +700,10 @@ class ContentSecurityPolicy
      */
     protected function addHostPolicy($directive, $url)
     {
+        if ($url === '*') {
+            trigger_error('Setting a host policy parameter to \'*\' is allowed but is not secure.', E_USER_NOTICE);
+            return $this->setPolicyParameter($directive, '*');
+        }
         $wildport = false;
         if (substr($url, -2) === ':*') {
             $wildport = true;
@@ -846,7 +755,12 @@ class ContentSecurityPolicy
             if (! in_array($scheme, array('http', 'https'))) {
                 throw InvalidArgumentException::invalidHostScheme();
             }
+            if ($scheme === 'http') {
+                trigger_error('Use of \'http\' in a host source is allowed but is not secure.', E_USER_NOTICE);
+            }
             $policy = $scheme . '://';
+        } else {
+            trigger_error('Not specifying a URL scheme in a host source is allowed but is not secure.', E_USER_NOTICE);
         }
         $policy .= $parse['host'];
         if (isset($parse['port'])) {
@@ -921,6 +835,11 @@ class ContentSecurityPolicy
                 $policy = strtolower($policy);
                 if (! in_array($policy, array('https:', 'data:', 'mediastream:', 'blob:', 'filesystem:'))) {
                     throw InvalidArgumentException::invalidFetchScheme($policy);
+                }
+                if (in_array($policy, array('data:', 'mediastream:', 'blob:', 'filesystem:'))) {
+                    $warning = "Use of the 'data:', 'mediastream:', 'blob:', and 'filesystem:' scheme sources in CSP";
+                    $warning .=" are allowed but strongly cautioned against.";
+                    trigger_error($warning, E_USER_NOTICE);
                 }
                 return $this->setPolicyParameter($directive, $policy);
                 break;
@@ -1158,25 +1077,39 @@ class ContentSecurityPolicy
     public function __construct($param = null)
     {
         if (is_null($param)) {
-            $this->definePolicy('script-src', '\'self\'');
-            $this->definePolicy('connect-src', '\'self\'');
-            $this->definePolicy('style-src', '\'self\'');
-            $this->definePolicy('img-src', '\'self\'');
-            $this->definePolicy('media-src', '\'self\'');
+            $this->setPolicyParameter('script-src', '\'self\'');
+            $this->setPolicyParameter('connect-src', '\'self\'');
+            $this->setPolicyParameter('style-src', '\'self\'');
+            $this->setPolicyParameter('img-src', '\'self\'');
+            $this->setPolicyParameter('media-src', '\'self\'');
         } else {
             $param = trim($param);
-            $test = strtolower(substr($param, -5));
-            if ($test === '.json') {
-              //json file
-                $a = 'b';
-            } else {
-                $arr = explode(';', $param);
-                foreach ($arr as $policy) {
-                    $policy = $this->adjustPolicy($policy);
-                    if (! $this->definePolicy('default-src', $policy)) {
-                      //url policy
-                        $a = 'b';
+            $param = preg_replace('/\s+/', ' ', $param);
+            $arr = explode(' ', $param);
+            foreach ($arr as $policy) {
+                $policy = $this->adjustPolicy($policy);
+                if (in_array($policy, array(
+                    '\'none\'',
+                    '\'self\'',
+                    '\'unsafe-inline\'',
+                    '\'unsafe-eval\'',
+                    'https:', 'data:',
+                    'mediastream:',
+                    'blob:',
+                    'filesystem:'
+                ))) {
+                    if (in_array($policy, array(
+                            'data:', 'mediastream:',
+                            'blob:',
+                            'filesystem:'
+                        ))) {
+                        $warning = "Use of the 'data:', 'mediastream:', 'blob:', and 'filesystem:' scheme sources in CSP";
+                        $warning .=" are allowed but strongly cautioned against.";
+                        trigger_error($warning, E_USER_NOTICE);
                     }
+                    $this->setPolicyParameter('default-src', $policy);
+                } else {
+                    $this->addHostPolicy('default-src', $policy);
                 }
             }
         }

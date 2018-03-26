@@ -16,6 +16,23 @@ use PHPUnit\Framework\TestCase;
 final class FetchConnectTest extends TestCase
 {
     /**
+     * Tests header output when explicitly set to *
+     *
+     * @return void
+     */
+    public function testPolicyUnprotected(): void
+    {
+        $expected = 'default-src \'none\'; connect-src *;';
+        $directive = 'connect-src';
+        $policy = '*';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+        @$csp->addFetchPolicy($directive, $policy);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testPolicyUnprotected()
+
+  
+    /**
      * Tests header output when explicitly set to 'self'
      *
      * @return void
@@ -140,7 +157,7 @@ final class FetchConnectTest extends TestCase
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
         $policy = 'example.org';
-        $csp->addFetchPolicy($directive, $policy);
+        @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testPolicySelfHostname()
@@ -159,7 +176,7 @@ final class FetchConnectTest extends TestCase
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
         $policy = 'example.org:443';
-        $csp->addFetchPolicy($directive, $policy);
+        @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testPolicySelfHostnamePort()
@@ -216,7 +233,7 @@ final class FetchConnectTest extends TestCase
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
         $policy = '*.example.org';
-        $csp->addFetchPolicy($directive, $policy);
+        @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testPolicySelfWildcardInHostname()
@@ -234,7 +251,7 @@ final class FetchConnectTest extends TestCase
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
         $policy = '*.example.org:443';
-        $csp->addFetchPolicy($directive, $policy);
+        @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testPolicySelfWildcardInHostnameButNotInPort()
@@ -253,7 +270,7 @@ final class FetchConnectTest extends TestCase
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
         $policy = '*.example.org:*';
-        $csp->addFetchPolicy($directive, $policy);
+        @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testPolicySelfWildcardInHostnameAndInPort()

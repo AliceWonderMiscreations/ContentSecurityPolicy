@@ -42,37 +42,6 @@ final class ContentSecurityPolicyTest extends TestCase
     }//end testDefaultSelf()
 
     /**
-     * Tests header output when 'self' parameter specified to constructor and 'none' specified
-     * for object-src. Should suppress output of plugin-types.
-     *
-     * @return void
-     */
-    public function testDefaultSelfObjectNone(): void
-    {
-        $expected = 'default-src \'self\'; object-src \'none\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultSelfObjectNone()
-
-    /**
-     * Tests header output when 'self' parameter specified to constructor and 'self' specified
-     * for object-src. Should display output of plugin-types but suppress object-src since it
-     * is identical to default-src.
-     *
-     * @return void
-     */
-    public function testDefaultSelfObjectSelf(): void
-    {
-        $expected = 'default-src \'self\'; plugin-types image/svg+xml application/pdf;';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultSelfObjectSelf()
-
-    /**
      * Tests header output when 'none' parameter specified to constructor
      *
      * @return void
@@ -84,171 +53,52 @@ final class ContentSecurityPolicyTest extends TestCase
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testDefaultNone()
-
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for script-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneScriptSelf(): void
-    {
-        $expected = 'default-src \'none\'; script-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('script-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneScriptSelf()
-
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for style-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneStyleSelf(): void
-    {
-        $expected = 'default-src \'none\'; style-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('style-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneStyleSelf()
-
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for img-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneImgSelf(): void
-    {
-        $expected = 'default-src \'none\'; img-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('img-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneImgSelf()
-
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for connect-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneConnectSelf(): void
-    {
-        $expected = 'default-src \'none\'; connect-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('connect-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneConnectSelf()
-
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for font-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneFontSelf(): void
-    {
-        $expected = 'default-src \'none\'; font-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('font-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneFontSelf()
     
     /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for manifest-src.
+     * Tests header output when '*' parameter specified to constructor
      *
      * @return void
      */
-    public function testDefaultNoneManifestSelf(): void
+    public function testDefaultWildcard(): void
     {
-        $expected = 'default-src \'none\'; manifest-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('manifest-src', 'self');
+        $expected = 'default-src *; plugin-types image/svg+xml application/pdf;';
+        $csp = @new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('*');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneFontSelf()
+    }//end testDefaultWildcard()
 
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for media-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneMediaSelf(): void
-    {
-        $expected = 'default-src \'none\'; media-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('media-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneMediaSelf()
-
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for frame-src.
-     *
-     * @return void
-     */
-    public function testDefaultNoneFrameSelf(): void
-    {
-        $expected = 'default-src \'none\'; child-src \'self\'; frame-src \'self\'; worker-src \'none\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('frame-src', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneFrameSelf()
     
     /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for frame-src.
+     * Tests header output when 'https:' parameter specified to constructor
      *
      * @return void
      */
-    public function testDefaultNoneWorkerSelf(): void
+    public function testDefaultHttps(): void
     {
-        $expected = 'default-src \'none\'; child-src \'self\'; frame-src \'none\'; worker-src \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('worker-src', 'self');
+        $expected = 'default-src https:; plugin-types image/svg+xml application/pdf;';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('https:');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneWorkerSelf()
+    }//end testDefaultHttps()
 
+    
     /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for form-action.
+     * Tests header output when 'self https://example.org' parameter specified to constructor
      *
      * @return void
      */
-    public function testDefaultNoneFormActionSelf(): void
+    public function testDefaultSelfPlusSchemeAndHostname(): void
     {
-        $expected = 'default-src \'none\'; form-action \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('form-action', 'self');
+        $expected = 'default-src \'self\' https://example.org; plugin-types image/svg+xml application/pdf;';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://example.org');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneFormActionSelf()
+    }//end testDefaultSelfPlusSchemeAndHostname()
 
-    /**
-     * Tests header output when 'none' parameter specified to constructor and 'self' specified
-     * for frame-ancestors.
-     *
-     * @return void
-     */
-    public function testDefaultNoneFrameAncestorsSelf(): void
-    {
-        $expected = 'default-src \'none\'; frame-ancestors \'self\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('frame-ancestors', 'self');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testDefaultNoneFrameAncestorsSelf()
+
+    
+
+    
 
     /**
      * Tests generation of nonce. Should be 16-byte when argument null, 16-byte when argument
@@ -285,7 +135,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
         $expected = 'default-src \'self\'; object-src \'none\'; script-src \'nonce-' . $nonce . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addNonce('script-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -302,7 +152,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
         $expected = 'default-src \'self\'; object-src \'none\'; style-src \'nonce-' . $nonce . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addNonce('style-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -321,7 +171,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha256-' . $hash . '\';';
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addScriptHash('sha256', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -341,7 +191,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $hash = bin2hex($raw);
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addScriptHash('sha256', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -360,7 +210,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha384-' . $hash . '\';';
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addScriptHash('sha384', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -380,7 +230,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $hash = bin2hex($raw);
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addScriptHash('sha384', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -399,7 +249,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $expected = 'default-src \'self\'; object-src \'none\'; script-src \'sha512-' . $hash . '\';';
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addScriptHash('sha512', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -419,7 +269,7 @@ final class ContentSecurityPolicyTest extends TestCase
         $hash = bin2hex($raw);
         
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addDirectivePolicy('object-src', 'none');
+        $csp->addFetchPolicy('object-src', 'none');
         $csp->addScriptHash('sha512', $hash);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
@@ -436,15 +286,15 @@ final class ContentSecurityPolicyTest extends TestCase
      *
      * @return void
      */
-    public function testScriptUnsafeInline(): void
-    {
-        $expected = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('script-src', 'self');
-        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testScriptUnsafeInline()
+//    public function testScriptUnsafeInline(): void
+//    {
+//        $expected = 'default-src \'none\'; script-src \'self\' \'unsafe-inline\';';
+//        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+//        $csp->addDirectivePolicy('script-src', 'self');
+//        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
+//        $actual = $csp->buildHeader();
+//        $this->assertEquals($expected, $actual);
+//    }//end testScriptUnsafeInline()
 
     
     /**
@@ -452,15 +302,15 @@ final class ContentSecurityPolicyTest extends TestCase
      *
      * @return void
      */
-    public function testScriptUnsafeEval(): void
-    {
-        $expected = 'default-src \'none\'; script-src \'self\' \'unsafe-eval\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('script-src', 'self');
-        $csp->addDirectivePolicy('script-src', 'unsafe-eval');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testScriptUnsafeEval()
+//    public function testScriptUnsafeEval(): void
+//    {
+//        $expected = 'default-src \'none\'; script-src \'self\' \'unsafe-eval\';';
+//        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+//        $csp->addDirectivePolicy('script-src', 'self');
+//        $csp->addDirectivePolicy('script-src', 'unsafe-eval');
+//        $actual = $csp->buildHeader();
+//        $this->assertEquals($expected, $actual);
+//    }//end testScriptUnsafeEval()
 
     
     /**
@@ -468,15 +318,15 @@ final class ContentSecurityPolicyTest extends TestCase
      *
      * @return void
      */
-    public function testStyleUnsafeInline(): void
-    {
-        $expected = 'default-src \'none\'; style-src \'self\' \'unsafe-inline\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('style-src', 'self');
-        $csp->addDirectivePolicy('style-src', 'unsafe-inline');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testStyleUnsafeInline()
+//    public function testStyleUnsafeInline(): void
+//    {
+//        $expected = 'default-src \'none\'; style-src \'self\' \'unsafe-inline\';';
+//        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+//        $csp->addDirectivePolicy('style-src', 'self');
+//        $csp->addDirectivePolicy('style-src', 'unsafe-inline');
+//        $actual = $csp->buildHeader();
+//        $this->assertEquals($expected, $actual);
+//    }//end testStyleUnsafeInline()
 
 
     /**
@@ -484,16 +334,16 @@ final class ContentSecurityPolicyTest extends TestCase
      *
      * @return void
      */
-    public function testScriptAddNonceThenInline(): void
-    {
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addNonce('script-src', $nonce);
-        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testScriptAddNonceThenInline()
+//    public function testScriptAddNonceThenInline(): void
+//    {
+//        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+//        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
+//        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+//        $csp->addNonce('script-src', $nonce);
+//        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
+//        $actual = $csp->buildHeader();
+//        $this->assertEquals($expected, $actual);
+//    }//end testScriptAddNonceThenInline()
 
     
     /**
@@ -501,16 +351,16 @@ final class ContentSecurityPolicyTest extends TestCase
      *
      * @return void
      */
-    public function testScriptAddInlineThenNonce(): void
-    {
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
-        $csp->addNonce('script-src', $nonce);
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testScriptAddInlineThenNonce()
+//    public function testScriptAddInlineThenNonce(): void
+//    {
+//        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+//        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
+//        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
+//        $csp->addDirectivePolicy('script-src', 'unsafe-inline');
+//        $csp->addNonce('script-src', $nonce);
+//        $actual = $csp->buildHeader();
+//        $this->assertEquals($expected, $actual);
+//    }//end testScriptAddInlineThenNonce()
 }//end class
 
 ?>
