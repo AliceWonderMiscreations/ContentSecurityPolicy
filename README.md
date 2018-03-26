@@ -3,6 +3,9 @@ ContentSecurityPolicy
 
 __THIS CLASS IS NOT YET READY FOR USE__
 
+Some stuff here is not fully implemented. Some not at all. Some implemented
+stuff not documented.
+
 Content Security Policy (abbreviated as CSP) is a standardized mechanism for
 web applications to tell the requesting client what kind of resources are
 allowed in a web page and under what conditions they are allowed.
