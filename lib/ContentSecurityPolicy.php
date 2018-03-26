@@ -795,6 +795,11 @@ class ContentSecurityPolicy
      */
     protected function addHostPolicy($directive, $url)
     {
+        $wildport = false;
+        if (substr($url, -2) === ':*') {
+            $wildport = true;
+            $url = preg_replace('/\:\*/', '', $url);
+        }
         if (substr_count($url, ':') === 0) {
             $parse = array();
             $testurl = $url;
@@ -846,6 +851,9 @@ class ContentSecurityPolicy
         $policy .= $parse['host'];
         if (isset($parse['port'])) {
             $policy = $policy . ':' . $parse['port'];
+        }
+        if ($wildport) {
+            $policy .= ':*';
         }
         return $this->setPolicyParameter($directive, $policy);
     }//end addHostPolicy()
