@@ -147,7 +147,7 @@ class.
 
 ### Basal Keyword Parameters
 
-The `'self'` and `'none'` keyword are treated special by this class. When set,
+The `'self'` and `'none'` keywords are treated special by this class. When set,
 any previously set parameters for the directive will be replaced.
 
 They can be set with the class `addFetchPolicy($directive, $policy);` method:
@@ -249,6 +249,10 @@ To add this parameter in this class:
 This will generate a message to your log files telling you to fix your very
 dangerous code.
 
+See [`eval()` - JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval)
+on the Mozilla Developer Network for ways to port JS that uses `eval()` to
+something both safer and faster.
+
 ### Matching Hash Source
 
 In CSP level 2 this was used solely as a secure way to allow inline script and
@@ -271,11 +275,11 @@ hash of the resource that clients are to allow.
 CSP level 3 allows three different algorithm choices, from the
 [SHA-2 family](https://en.wikipedia.org/wiki/SHA-2):
 
-* sha256
-* sha384
-* sha512
+* `sha256`
+* `sha384`
+* `sha512`
 
-CSP level 2 only allows sha256 and that is actually what I recommend you use,
+CSP level 2 only allows `sha256` and that is actually what I recommend you use,
 not just for CSP level 2 compatibility but because the result is a smaller
 string. Technically that means a collision (where more than one file has the
 same hash) is more likely, but with any of those algorithms, a collision is
@@ -291,7 +295,7 @@ SHA-2 is susceptible to a length extension attack but that is not relevant to
 a digest hash, that involves a cryptography secret that a digest hash simply
 does not have.
 
-Anyway I recommend just using sha256 for a hash source parameter.
+Anyway I recommend just using `sha256` for a hash source parameter.
 
 The CSP specifications requires the hash be base64 encoded. The class here
 will convert a hex encoded hash to base64 for you.

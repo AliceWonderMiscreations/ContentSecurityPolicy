@@ -13,14 +13,14 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
 // @codingStandardsIgnoreLine
-final class FetchConnectTest extends TestCase
+final class FetchDirectiveConnectSrcTest extends TestCase
 {
     /**
      * Tests header output when explicitly set to *
      *
      * @return void
      */
-    public function testPolicyUnprotected(): void
+    public function testParameterWildcardForEverything(): void
     {
         $expected = 'default-src \'none\'; connect-src *;';
         $directive = 'connect-src';
@@ -29,7 +29,8 @@ final class FetchConnectTest extends TestCase
         @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicyUnprotected()
+    }//end testParameterWildcardForEverything()
+
 
   
     /**
@@ -37,7 +38,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelf(): void
+    public function testParameterSelf(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\';';
         $directive = 'connect-src';
@@ -46,7 +47,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelf()
+    }//end testParameterSelf()
+
 
     
     /**
@@ -54,7 +56,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicyNone(): void
+    public function testParameterNone(): void
     {
         $expected = 'default-src \'self\'; connect-src \'none\'; plugin-types image/svg+xml application/pdf;';
         $directive = 'connect-src';
@@ -63,7 +65,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicyNone()
+    }//end testParameterNone()
+
 
     
     /**
@@ -71,7 +74,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicyHttps(): void
+    public function testSchemeParamaterHttps(): void
     {
         $expected = 'default-src \'none\'; connect-src https:;';
         $directive = 'connect-src';
@@ -80,7 +83,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicyHttps()
+    }//end testSchemeParamaterHttps()
+
 
     
     /**
@@ -88,7 +92,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfHttps(): void
+    public function testParamatersSelfAndSchemeHttps(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' https:;';
         $directive = 'connect-src';
@@ -99,7 +103,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfHttps()
+    }//end testParamatersSelfAndSchemeHttps()
+
 
     
     /**
@@ -107,7 +112,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicyResetToNone(): void
+    public function testResetParamatersToNone(): void
     {
         $expected = 'default-src \'self\'; connect-src \'none\'; plugin-types image/svg+xml application/pdf;';
         $directive = 'connect-src';
@@ -120,7 +125,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicyResetToNone()
+    }//end testResetParamatersToNone()
+
 
     
     /**
@@ -128,7 +134,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicyResetToSelf(): void
+    public function testResetParametersToSelf(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\';';
         $directive = 'connect-src';
@@ -141,7 +147,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicyResetToSelf()
+    }//end testResetParametersToSelf()
+
 
     
     /**
@@ -149,7 +156,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfHostname(): void
+    public function testParamatersSelfAndHostname(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' example.org;';
         $directive = 'connect-src';
@@ -160,7 +167,8 @@ final class FetchConnectTest extends TestCase
         @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfHostname()
+    }//end testParamatersSelfAndHostname()
+
 
     
     /**
@@ -168,7 +176,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfHostnamePort(): void
+    public function testParamatersSelfAndHostnameWithPort(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' example.org:443;';
         $directive = 'connect-src';
@@ -179,7 +187,8 @@ final class FetchConnectTest extends TestCase
         @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfHostnamePort()
+    }//end testParamatersSelfAndHostnameWithPort()
+
 
     
     /**
@@ -187,7 +196,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfSchemeHostname(): void
+    public function testParametersSelfAndSchemeWithHostname(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' https://example.org;';
         $directive = 'connect-src';
@@ -198,7 +207,7 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfSchemeHostname()
+    }//end testParametersSelfAndSchemeWithHostname()
 
     
     /**
@@ -206,7 +215,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfSchemeHostnamePort(): void
+    public function testParametersSelfAndSchemeWithHostnameWithPort(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' https://example.org:443;';
         $directive = 'connect-src';
@@ -217,7 +226,8 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfSchemeHostnamePort()
+    }//end testParametersSelfAndSchemeWithHostnameWithPort()
+
 
     
     /**
@@ -225,7 +235,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfWildcardInHostname(): void
+    public function testParametersSelfWithWildcardInHostname(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' *.example.org;';
         $directive = 'connect-src';
@@ -236,14 +246,15 @@ final class FetchConnectTest extends TestCase
         @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfWildcardInHostname()
+    }//end testParametersSelfWithWildcardInHostname()
+
     
     /**
      * Tests header output when explicitly set to 'self *.example.org:443'
      *
      * @return void
      */
-    public function testPolicySelfWildcardInHostnameButNotInPort(): void
+    public function testParametersSelfWithWildcardInHostnameWithPort(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' *.example.org:443;';
         $directive = 'connect-src';
@@ -254,7 +265,8 @@ final class FetchConnectTest extends TestCase
         @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfWildcardInHostnameButNotInPort()
+    }//end testParametersSelfWithWildcardInHostnameWithPort()
+
 
     
     /**
@@ -262,7 +274,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfWildcardInHostnameAndInPort(): void
+    public function testParametersSelfWithWildcardInHostnameAndInPort(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' *.example.org:*;';
         $directive = 'connect-src';
@@ -273,7 +285,8 @@ final class FetchConnectTest extends TestCase
         @$csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfWildcardInHostnameAndInPort()
+    }//end testParametersSelfWithWildcardInHostnameAndInPort()
+
 
     
     /**
@@ -281,7 +294,7 @@ final class FetchConnectTest extends TestCase
      *
      * @return void
      */
-    public function testPolicySelfSchemeWildcardInHostnameAndInPort(): void
+    public function testParametersSelfWithSchemeAndWildcardInHostnameAndInPort(): void
     {
         $expected = 'default-src \'none\'; connect-src \'self\' https://*.example.org:*;';
         $directive = 'connect-src';
@@ -292,7 +305,25 @@ final class FetchConnectTest extends TestCase
         $csp->addFetchPolicy($directive, $policy);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testPolicySelfSchemeWildcardInHostnameAndInPort()
+    }//end testParametersSelfWithSchemeAndWildcardInHostnameAndInPort()
+
+    
+    /**
+     * Tests header output when copying default and appending
+     *
+     * @return void
+     */
+    public function testCopyDefaultAddHost(): void
+    {
+        $expected = 'default-src \'self\' https://cdn.example.net; connect-src \'self\' https://cdn.example.net https://*.elsewhere.com; plugin-types image/svg+xml application/pdf;';
+        $directive = 'connect-src';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://cdn.example.net');
+        $csp->copyDefaultFetchPolicy($directive);
+        $policy = 'https://*.elsewhere.com';
+        $csp->addFetchPolicy($directive, $policy);
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testCopyDefaultAddHost()
 }//end class
 
 ?>

@@ -1024,6 +1024,55 @@ class ContentSecurityPolicy
         $random = random_bytes($bytes);
         return base64_encode($random);
     }//end generateNonce()
+    
+    /**
+     * Copies the content of the default-src directive into the specified directive
+     *
+     * @param string $directive The directive to copy default-src into.
+     *
+     * @return bool True on success, False on failure.
+     */
+    public function copyDefaultFetchPolicy(string $directive): bool
+    {
+        $directive = trim(strtolower($directive));
+        switch ($directive) {
+            case 'connect-src':
+                $this->connectSrc = $this->defaultSrc;
+                break;
+            case 'font-src':
+                $this->fontSrc = $this->defaultSrc;
+                break;
+            case 'frame-src':
+                $this->frameSrc = $this->defaultSrc;
+                break;
+            case 'img-src':
+                $this->imgSrc = $this->defaultSrc;
+                break;
+            case 'manifest-src':
+                $this->manifestSrc = $this->defaultSrc;
+                break;
+            case 'media-src':
+                $this->mediaSrc = $this->defaultSrc;
+                break;
+            case 'object-src':
+                $this->objectSrc = $this->defaultSrc;
+                break;
+            case 'script-src':
+                $this->scriptSrc = $this->defaultSrc;
+                break;
+            case 'style-src':
+                $this->styleSrc = $this->defaultSrc;
+                break;
+            case 'worker-src':
+                $this->workerSrc = $this->defaultSrc;
+                break;
+            default:
+                return false;
+                break;
+        }
+        return true;
+    }//end copyDefaultFetchPolicy()
+
 
     /**
      * Creates the CSP header string
