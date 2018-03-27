@@ -94,69 +94,89 @@ final class ContentSecurityPolicyTest extends TestCase
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testDefaultSelfPlusSchemeAndHostname()
-
-
     
-
-    
-
     /**
-     * Tests generation of nonce. Should be 16-byte when argument null, 16-byte when argument
-     * is < 16, > 16 bytes byte when argument is >16. (2 hex = 1 byte)
+     * Tests header output when 'self https://example.org unsafe-inline' parameters specified to constructor
      *
      * @return void
      */
-    public function testGenerateNonce(): void
+    public function testDefaultSelfPlusSchemeAndHostnameAndUnsafeInline(): void
     {
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $raw = base64_decode($nonce);
-        $hex = bin2hex($raw);
-        $len = strlen($hex);
-        $this->assertEquals(32, $len);
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce(6);
-        $raw = base64_decode($nonce);
-        $hex = bin2hex($raw);
-        $len = strlen($hex);
-        $this->assertEquals(32, $len);
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce(24);
-        $raw = base64_decode($nonce);
-        $hex = bin2hex($raw);
-        $len = strlen($hex);
-        $this->assertEquals(48, $len);
-    }//end testGenerateNonce()
-    
-    /**
-     * Test script with base64 nonce
-     *
-     * @return void
-     */
-    public function testScriptNonceBase64(): void
-    {
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'self\'; object-src \'none\'; script-src \'nonce-' . $nonce . '\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addFetchPolicy('object-src', 'none');
-        $csp->addNonce('script-src', $nonce);
+        $expected = 'default-src \'self\' https://example.org \'unsafe-inline\'; plugin-types image/svg+xml application/pdf;';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://example.org unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testScriptNonceBase64()
+    }//end testDefaultSelfPlusSchemeAndHostnameAndUnsafeInline()
 
     
     /**
-     * Test style with base64 nonce
+     * Tests header output when 'self unsafe-eval' parameters specified to constructor
      *
      * @return void
      */
-    public function testStyleNonceBase64(): void
+    public function testDefaultSelfUnsafeEval(): void
     {
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'self\'; object-src \'none\'; style-src \'nonce-' . $nonce . '\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
-        $csp->addFetchPolicy('object-src', 'none');
-        $csp->addNonce('style-src', $nonce);
+        $expected = 'default-src \'self\' \'unsafe-eval\'; plugin-types image/svg+xml application/pdf;';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self unsafe-eval');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testStyleNonceBase64()
+    }//end testDefaultSelfUnsafeEval()
+
+    
+    /**
+     * Tests header output when 'self nonce-foo' parameters specified to constructor
+     *
+     * @return void
+     */
+    public function testDefaultSelfWithNonce(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $arg = 'self nonce-' . $nonce;
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy($arg);
+        $expected = 'default-src \'self\' \'nonce-' . $nonce . '\'; plugin-types image/svg+xml application/pdf;';
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testDefaultSelfWithNonce()
+
+    
+    /**
+     * Tests header output when 'nonce-foo strict-dynamic' parameters specified to constructor
+     *
+     * @return void
+     */
+    public function testDefaultWithNonceAndStrictDynamic(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $arg = 'nonce-' . $nonce . ' strict-dynamic';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy($arg);
+        $expected = 'default-src \'nonce-' . $nonce . '\' \'strict-dynamic\';';
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testDefaultWithNonceAndStrictDynamic()
+
+    
+    /**
+     * Tests header output only 'strict-dynamic' parameter specified to constructor
+     *
+     * @return void
+     */
+    public function testDefaultWithOnlyStrictDynamic(): void
+    {
+        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
+        $arg = 'strict-dynamic';
+        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy($arg);
+        $expected = 'default-src \'none\';';
+        $actual = $csp->buildHeader();
+        $this->assertEquals($expected, $actual);
+    }//end testDefaultWithOnlyStrictDynamic()
+
+
+
+    
+
+    
+
+    
 
     
     /**

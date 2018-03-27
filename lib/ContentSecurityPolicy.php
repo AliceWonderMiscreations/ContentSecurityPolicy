@@ -258,16 +258,19 @@ class ContentSecurityPolicy
         $test = strtolower($policy);
         switch ($test) {
             case 'none':
-                $policy = ('\'none\'');
+                $policy = '\'none\'';
                 break;
             case 'self':
-                $policy = ('\'self\'');
+                $policy = '\'self\'';
                 break;
             case 'unsafe-inline':
-                $policy = ('\'unsafe-inline\'');
+                $policy = '\'unsafe-inline\'';
                 break;
             case 'unsafe-eval':
-                $policy = ('\'unsafe-eval\'');
+                $policy = '\'unsafe-eval\'';
+                break;
+            case 'strict-dynamic':
+                $policy = '\'strict-dynamic\'';
                 break;
         }
         return $policy;
@@ -310,8 +313,11 @@ class ContentSecurityPolicy
                     return true;
                 }
                 break;
-            default:
+            case '\'unsafe-eval\'':
                 if ($directive === 'script-src') {
+                    $warning = 'It is not safe to set the \'unsafe-eval\' parameter. ';
+                    $warning .= 'Please fix your JavaScript so this is no longer needed.';
+                    trigger_error($warning, E_USER_NOTICE);
                     $this->scriptSrc[] = '\'unsafe-eval\'';
                     return true;
                 }
@@ -382,6 +388,8 @@ class ContentSecurityPolicy
 
     /* new */
     
+    
+    
     /**
      * Determines if the array is set to 'none'.
      *
@@ -389,7 +397,7 @@ class ContentSecurityPolicy
      *
      * @return bool True if set to 'none', False if not.
      */
-    protected function checkForNone($arr)
+    protected function checkForNone($arr): bool
     {
         if (isset($arr[0])) {
             if ($arr[0] === '\'none\'') {
@@ -398,6 +406,35 @@ class ContentSecurityPolicy
         }
         return false;
     }//end checkForNone()
+    
+    /**
+     * Determines whether or not object tags are allowed
+     *
+     * @return bool True if allowed, False if not.
+     */
+    protected function objectsAllowed(): bool
+    {
+        if (count($this->objectSrc) > 0) {
+            if ($this->objectSrc[0] === '\'none\'') {
+                return false;
+            }
+            return true;
+        }
+        if ($this->defaultSrc[0] === '\'none\'') {
+            return false;
+        }
+        if ($this->defaultSrc[0] === '\'self\'') {
+            return true;
+        }
+        foreach ($this->defaultSrc as $param) {
+            $test = substr($param, 0, 1);
+            if ($test !== '\'') {
+                return true;
+            }
+        }
+        return false;
+    }//end objectsAllowed()
+
 
     
     /**
@@ -652,25 +689,44 @@ class ContentSecurityPolicy
      *
      * @return bool True on success, False on failure
      */
-    public function addNonce($directive, string $nonce)
+    protected function addNonce(string $directive, string $nonce)
     {
         $nonce = trim($nonce);
         if (! $this->validateNonce($nonce)) {
             throw InvalidArgumentException::badNonce($nonce);
         }
         $directive = trim(strtolower($directive));
-        if (! in_array($directive, array('script-src', 'style-src'))) {
+        if (! in_array($directive, array('default-src', 'script-src', 'style-src'))) {
             return false;
         }
         $policy = '\'nonce-' . $nonce . '\'';
         switch ($directive) {
+            case 'default-src':
+                if (in_array($policy, $this->defaultSrc)) {
+                    return true;
+                }
+                $n = array_search('\'unsafe-inline\'', $this->defaultSrc);
+                if ($n === false) {
+                    if ($this->checkForNone($this->defaultSrc)) {
+                        $this->defaultSrc = array($policy);
+                    } else {
+                        $this->defaultSrc[] = $policy;
+                    }
+                } else {
+                    $this->defaultSrc[$n] = $policy;
+                }
+                break;
             case 'script-src':
                 if (in_array($policy, $this->scriptSrc)) {
                     return true;
                 }
                 $n = array_search('\'unsafe-inline\'', $this->scriptSrc);
                 if ($n === false) {
-                    $this->scriptSrc[] = $policy;
+                    if ($this->checkForNone($this->scriptSrc)) {
+                        $this->scriptSrc = array($policy);
+                    } else {
+                        $this->scriptSrc[] = $policy;
+                    }
                 } else {
                     $this->scriptSrc[$n] = $policy;
                 }
@@ -681,7 +737,11 @@ class ContentSecurityPolicy
                 }
                 $n = array_search('\'unsafe-inline\'', $this->styleSrc);
                 if ($n === false) {
-                    $this->styleSrc[] = $policy;
+                    if ($this->checkForNone($this->styleSrc)) {
+                        $this->styleSrc = array($policy);
+                    } else {
+                        $this->styleSrc[] = $policy;
+                    }
                 } else {
                     $this->styleSrc[$n] = $policy;
                 }
@@ -689,6 +749,69 @@ class ContentSecurityPolicy
         }
         return true;
     }//end addNonce()
+    
+    /**
+     * Set the 'strict-dynamic' parameter to the script-src or default-src directive.
+     *
+     * @param string $directive The CSP directive to add the parameter to.
+     *
+     * @return bool True on success, False on failure.
+     */
+    protected function setStrictDynamic(string $directive): bool
+    {
+        if (! in_array($directive, array('default-src', 'script-src'))) {
+            return false;
+        }
+        $nonceHash = false;
+        switch ($directive) {
+            case 'default-src':
+                foreach ($this->defaultSrc as $param) {
+                    if (substr($param, 0, 7) === '\'nonce-') {
+                        $nonceHash = true;
+                    }
+                }
+                if ($nonceHash) {
+                    if (! in_array('\'strict-dynamic\'', $this->defaultSrc)) {
+                        $this->defaultSrc[] = '\'strict-dynamic\'';
+                    }
+                    return true;
+                }
+                break;
+            case 'script-src':
+                foreach ($this->scriptSrc as $param) {
+                    if (substr($param, 0, 7) === '\'nonce-') {
+                        $nonceHash = true;
+                    }
+                }
+                foreach ($this->scriptSrc as $param) {
+                    if (substr($param, 0, 8) === '\'sha256-') {
+                        $nonceHash = true;
+                    }
+                }
+                foreach ($this->scriptSrc as $param) {
+                    if (substr($param, 0, 8) === '\'sha384-') {
+                        $nonceHash = true;
+                    }
+                }
+                foreach ($this->scriptSrc as $param) {
+                    if (substr($param, 0, 8) === '\'sha512-') {
+                        $nonceHash = true;
+                    }
+                }
+                if ($nonceHash) {
+                    if (! in_array('\'strict-dynamic\'', $this->scriptSrc)) {
+                        $this->scriptSrc[] = '\'strict-dynamic\'';
+                    }
+                    return true;
+                }
+                break;
+            default:
+                return false;
+                break;
+        }
+        return false;
+    }//end setStrictDynamic()
+
     
     /**
      * Add a host to a directive policy
@@ -795,8 +918,13 @@ class ContentSecurityPolicy
             throw InvalidArgumentException::invalidFetchDirective($directive);
         }
         $policyType = null;
-        if (in_array($policy, array('\'none\'', '\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''))) {
+        if (in_array($policy, array('\'none\'', '\'self\''))) {
             $policyType = 'keyword';
+        }
+        if (is_null($policyType)) {
+            if (in_array($policy, array('\'unsafe-inline\'', '\'unsafe-eval\''))) {
+                $policyType = 'unsafe';
+            }
         }
         if (is_null($policyType)) {
             if (substr($policy, -1) === ':') {
@@ -842,6 +970,9 @@ class ContentSecurityPolicy
                     trigger_error($warning, E_USER_NOTICE);
                 }
                 return $this->setPolicyParameter($directive, $policy);
+                break;
+            case 'unsafe':
+                return $this->addUnsafe($directive, $policy);
                 break;
             case 'hash':
                 $arr = explode('-', $policy);
@@ -1022,17 +1153,7 @@ class ContentSecurityPolicy
         // missing baseURI
         
         if (count($this->pluginTypes) > 0) {
-            $bool = false;
-            if (count($this->objectSrc) === 0) {
-                if ($this->defaultSrc[0] !== '\'none\'') {
-                    $bool = true;
-                }
-            } else {
-                if ($this->objectSrc[0] !== '\'none\'') {
-                    $bool = true;
-                }
-            }
-            if ($bool) {
+            if ($this->objectsAllowed()) {
                 $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
             }
         }
@@ -1093,23 +1214,35 @@ class ContentSecurityPolicy
                     '\'self\'',
                     '\'unsafe-inline\'',
                     '\'unsafe-eval\'',
-                    'https:', 'data:',
+                    'https:',
+                    'data:',
                     'mediastream:',
                     'blob:',
                     'filesystem:'
                 ))) {
                     if (in_array($policy, array(
-                            'data:', 'mediastream:',
+                            'data:',
+                            'mediastream:',
                             'blob:',
                             'filesystem:'
                         ))) {
-                        $warning = "Use of the 'data:', 'mediastream:', 'blob:', and 'filesystem:' scheme sources in CSP";
+                        $warning = "Use of the 'data:', 'mediastream:', 'blob:', ";
+                        $warning .= "and 'filesystem:' scheme sources in CSP";
                         $warning .=" are allowed but strongly cautioned against.";
                         trigger_error($warning, E_USER_NOTICE);
                     }
                     $this->setPolicyParameter('default-src', $policy);
                 } else {
-                    $this->addHostPolicy('default-src', $policy);
+                    $test = strtolower(substr($policy, 0, 6));
+                    if ($test === 'nonce-') {
+                        $narr = explode('-', $policy);
+                        $nonce = $narr[1];
+                        $this->addNonce('default-src', $nonce);
+                    } elseif ($policy === '\'strict-dynamic\'') {
+                        $this->setStrictDynamic('default-src');
+                    } else {
+                        $this->addHostPolicy('default-src', $policy);
+                    }
                 }
             }
         }

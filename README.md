@@ -199,6 +199,56 @@ That will add the `https:` parameter to the `style-src` directive, appending it
 to any existing directives that may already be there (e.g. `'self'`). It will
 remove an existing parameter of `'none'`.
 
+### Unsafe Compatibility Parameters
+
+For compatibility with web applications written with poor coding standards, two
+CSP fetch directive policy parameters exist that allow the easy use of inline
+`<script>` and `<style>` nodes as well as the very unsafe JavaScript `eval()`
+function.
+
+#### The `unsafe-inline` Parameter
+
+This parameter loosens up the CSP default of not allowing for inline
+JavaScript. Inline JavaScript is particularly dangerous to allow this way
+because the web browser has no way to validate the script it is executing is
+actually part of the web application or if it was injected as part for an
+[XSS Injection](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS))
+attack.
+
+To use this very unsafe parameter, you can add it to either the `script-src`
+directive or to the `style-src` directive:
+
+    $csp->addFetchPolicy('script-src' 'unsafe-inline');
+
+However it is preferable to use either the
+[Matching Hash Source](#matching-hash-source) or the
+[Matching Nonce](#matching-nonce) methods described below.
+
+Or you could fix your web application platform to no longer use inline JS/CSS.
+
+#### The `unsafe-eval` Parameter
+
+JavaScript has an `eval()` function that evaluates a string and executes it.
+It is considered very dangerous and should not be used in the context of a web
+browser where there is absolutely no way to adequately protect the user from
+the dangers of the function.
+
+The `eval()` function is part of JavaScript so browsers have to implement it,
+but when a web page is served with Content Security Policy the browsers can
+refuse to execute scripts that contain it, as they should because there is no
+way to validate the source of the string being executed and CSP is about source
+validation.
+
+Unfortunately there was whining and for compatibility with web applications
+that use `eval()`, a policy parameter was created to allow its continued use.
+
+To add this parameter in this class:
+
+    $csp->addFetchPolicy('script-src' 'unsafe-eval');
+
+This will generate a message to your log files telling you to fix your very
+dangerous code.
+
 ### Matching Hash Source
 
 In CSP level 2 this was used solely as a secure way to allow inline script and
@@ -257,7 +307,7 @@ example:
 
 A hash of that script would be of a string that starts with the newline
 directly after `<script type="application/javascript">` and ends with the
-newline directly before the `</scripr>`.
+newline directly before the `</script>`.
 
 You can generate the hash with the php `hash()` function:
 
@@ -269,7 +319,7 @@ While the class will convert that to base64 for you, if you prefer you can do
 it yourself:
 
     $raw = hash('sha256', $string, true);
-    $myhash = base64enc($raw);
+    $myhash = base64_enc($raw);
 
 That will result in a base64 encoded hash string instead of hex encoded.
 
@@ -297,9 +347,78 @@ Again it is okay if `$myhash` is hex, the class will convert it for you.
 The second way is to use a public property specifically created for adding a
 hash policy parameter, the `addScriptHash(string $algo, string $hash)` method.
 
-The first argument is the algorithm, the second is the hash.
+The first argument is the algorithm, the second is the hash:
 
+    $csp->addScriptHash('sha256', $myhash);
 
+### Matching Nonce
+
+In the context of Content Security Policy, a nonce is a token that can not be
+guessed. It is generated using a cryptographically secure random generator
+with a very large field of possible values.
+
+The W3C recommends a 128 bit nonce (16 bytes) and this class enforces that
+recommendation, it does not allow the use of a nonce smaller than 128 bits.
+
+The nonce needs to be generated when the page is created, sent with the header,
+and then specified in any inline `<script>` or `<style>` nodes as an attribute
+to the node. That will let the browser have some certainty that the `<script>`
+or `<style>` node is genuine and is not part of a
+[XSS](https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)) injection.
+
+This class has a static function that will generate a nonce for you:
+
+    public static function generateNonce(int $bytes = 16): string
+    {
+        if ($bytes < 16) {
+            $bytes = 16;
+        }
+        $random = random_bytes($bytes);
+        return base64_encode($random);
+    }//end generateNonce()
+
+As you can see, it makes sure the nonce is at least 16 bytes and it uses the
+php [`random_bytes`](http://php.net/manual/en/function.random-bytes.php)
+function to generate the nonce, which is a cryptographically secure function.
+The function returns a base64 encoded string.
+
+Since it is a static function, you can all it before instantiating the class
+allowing you to use it in the class constructor:
+
+    use \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy as CSP;
+    $nonce = CSP::generateNonce();
+    $csp = new CSP('self nonce-' . $nonce);
+
+That will instantiate an instance of the class with a `default-src` directive
+that looks something like:
+
+    default-src 'self' 'nonce-MBFAF0mLaOtuUuWKhJM3Tg==';
+
+As long as you do not specify a `script-src` or a `style-src` directive, the
+`default-src` parameters will apply to `<script>` and `<style>` nodes, so any
+inline `<script>` or `<style>` nodes would just need a `nonce` attribute that
+contains the nonce, and the browser would know to trust it is intended:
+
+    <script type="application/javascript" nonce="MBFAF0mLaOtuUuWKhJM3Tg==">
+    window.alert('Hello, World!');
+    </script>
+
+If you do need to specify custom parameters to `script-src` and/or `style-src`
+there are several options.
+
+First, you can copy the `default-src` parameters into them:
+
+    $csp->copyDefaultFetchPolicy('script-src');
+
+That will copy the contents of the `default-src` policy into `script-src`
+*replacing anything there* but allowing you to add additional parameters on
+top of them (such as additional remote hosts to trust).
+
+The other option is to just set the nonce in the `script-src` or `style-src`
+directive directly. There are two ways to do that:
+
+    $policyNonce = 'nonce-' . $nonce;
+    $csp->addFetchPolicy('script-src', $policyNonce);
 
 
 
