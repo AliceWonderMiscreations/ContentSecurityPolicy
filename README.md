@@ -218,7 +218,7 @@ attack.
 To use this very unsafe parameter, you can add it to either the `script-src`
 directive or to the `style-src` directive:
 
-    $csp->addFetchPolicy('script-src' 'unsafe-inline');
+    $csp->addFetchPolicy('script-src', 'unsafe-inline');
 
 However it is preferable to use either the
 [Matching Hash Source](#matching-hash-source) or the
@@ -244,7 +244,7 @@ that use `eval()`, a policy parameter was created to allow its continued use.
 
 To add this parameter in this class:
 
-    $csp->addFetchPolicy('script-src' 'unsafe-eval');
+    $csp->addFetchPolicy('script-src', 'unsafe-eval');
 
 This will generate a message to your log files telling you to fix your very
 dangerous code.
@@ -347,6 +347,8 @@ hashing algorithms you used, adding a dash, and then the hash. For example:
     $csp->addFetchPolicy('script-src', $policyParam);
 
 Again it is okay if `$myhash` is hex, the class will convert it for you.
+
+__Method Two: `addScriptHash`__
 
 The second way is to use a public property specifically created for adding a
 hash policy parameter, the `addScriptHash(string $algo, string $hash)` method.

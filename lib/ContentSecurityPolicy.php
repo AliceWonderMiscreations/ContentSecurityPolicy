@@ -652,9 +652,6 @@ class ContentSecurityPolicy
         if (! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
             throw InvalidArgumentException::badAlgo();
         }
-        if (! $this->checkInlineScriptsAllowed()) {
-            return false;
-        }
         if (ctype_xdigit($hash)) {
             $raw = hex2bin($hash);
             $hash = base64_encode($raw);
@@ -677,6 +674,12 @@ class ContentSecurityPolicy
             throw InvalidArgumentException::badHash();
         }
         $policy = '\'' . $algo . '-' . $hash . '\'';
+        if (count($this->scriptSrc) > 0) {
+            if ($this->scriptSrc[0] === '\'none\'') {
+                $this->scriptSrc[0] = $policy;
+                return true;
+            }
+        }
         $this->scriptSrc[] = $policy;
         return true;
     }//end addScriptHash()
@@ -950,11 +953,10 @@ class ContentSecurityPolicy
         }
         if (is_null($policyType)) {
             $test = strtolower(substr($policy, 0, 6));
-            if ($test === 'nonce') {
+            if ($test === 'nonce-') {
                 $policyType = 'nonce';
             }
         }
-        
         switch ($policyType) {
             case 'keyword':
                 return $this->addPolicyKeyword($directive, $policy);
@@ -979,7 +981,7 @@ class ContentSecurityPolicy
                 $algo = $arr[0];
                 $hash = $arr[1];
                 if ($directive === 'script-src') {
-                    $this->addScriptHash($algo, $hash);
+                    return $this->addScriptHash($algo, $hash);
                 }
                 break;
             case 'nonce':
