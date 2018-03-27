@@ -1100,11 +1100,11 @@ class ContentSecurityPolicy
             if (count($childSrc) > 0) {
                 // check for empty frameSrc
                 if (count($this->frameSrc) === 0) {
-                    $this->frameSrc[] = '\'none\'';
+                    $this->copyDefaultFetchPolicy('frame-src');
                 }
                 // check for empty workerSrc
                 if (count($this->workerSrc) === 0) {
-                    $this->workerSrc[] = '\'none\'';
+                    $this->copyDefaultFetchPolicy('worker-src');
                 }
                 $directives[] = 'child-src ' . implode(' ', $childSrc) . ';';
             }
