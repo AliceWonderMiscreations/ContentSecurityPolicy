@@ -34,10 +34,10 @@ that difficult for the attacker to modify or even completely remove the CSP
 header, CSP is not an effective means of providing protection to your users if
 you do not use TLS.
 
-The CSP header is basically a serialized array of directives, which each
-directive specifying a set of policies specific to that directive.
+The CSP header is basically a serialized array of directives, with each
+directive specifying a set of policy parameters specific to that directive.
 
-### Policy Directives
+### CSP Directives
 
 Directives are usually classified into five different categories:
 
@@ -68,6 +68,10 @@ The order the directives in the CSP header does not matter, but it is fairly
 standard to keep them together and put the fetch directives first, with the
 `default-src` directive as the very first directive.
 
+
+AWonderPHP CSP Class Implementation
+===================================
+
 As the rules set within `default-src` apply to any fetch directive that does
 not have its own rules specifically defined, I have set `default-src` to the
 keyword `'none'` by default in this class. I recommend using the keyword
@@ -81,9 +85,6 @@ W3C documentation is good too but the Mozilla documentation is more concise and
 details the actual implementation by a popular browser vendor that has a very
 open development process.
 
-
-AWonderPHP CSP Class Implementation
------------------------------------
 
 With the CSP class here, the CSP header is generated for you using public
 class functions that modify the defined directive policies within the class.
@@ -125,8 +126,178 @@ is not explicitly set in the constructor. Explicitly setting `default-src` to
 `'none'` will __not__ result in those other defaults being set.
 
 
+Setting Fetch Directive Policy Parameters
+-----------------------------------------
 
+With the exception of the `'nonce-[nonce_data]'` policy parameter, parameters
+for the `default-src` directive can *only* be defined when the class is
+instantiated, as described above. This was a design choice, if you do not like
+it there is a button on the github repository you can use to create a fork of
+this project where the [MIT License](LICENSE.md) specifically allows you to
+make and deploy changes.
 
+Parameters for the `child-src` fetch directive can not *directly* be set with
+this class. The `child-src` fetch directive is deprecated, and should only
+exist for compatibility with CSP level 2 browsers. This class crafts the policy
+for that directives based upon the contents of the `frame-src` and `worker-src`
+directives when the CSP header is built.
+
+All other fetch directives can be set with public methods that belong to this
+class.
+
+### Basal Keyword Parameters
+
+The `'self'` and `'none'` keyword are treated special by this class. When set,
+any previously set parameters for the directive will be replaced.
+
+They can be set with the class `addFetchPolicy($directive, $policy);` method:
+
+    $csp->addFetchPolicy('img-src', 'self');
+
+That will set the state of the `img-src` directive to contain a single parameter
+of `'self'`.
+
+    $csp->addFetchPolicy('object-src', 'none');
+
+That will set the state of the `object-src` directive to contain a single
+parameter of `'none'`.
+
+Additional parameters can be set after setting those basal keywords. However it
+should be noted that sending any parameter after `'none'` will remove the basal
+keyword `'none'`.
+
+### Scheme Source Parameters
+
+A scheme source allows you to white-list resources from an entire scheme. I do
+not recommend doing this, but it can be useful in migration of a platform to
+CSP giving you some CSP protection while you work on adjusting the platform to
+work with more specific code.
+
+The allowed scheme source parameters:
+
+* `https:` _Allow the resource to come from any https resource._
+* `data:` _Allow `data:` URIs to be used for the resource. This is very insecure._
+* `mediastream:` *Allow `mediastream:` URIs to be used for the resource._
+* `blob:` _Allow `blob:` URIs to be used for the resource._
+* `filesystem:` _Allow `filesystem:` URIs to be used for the content source._
+
+Note that this class does not support the `http:` scheme source even though CSP
+itself does. The HTTP protocol is not secure, and content injection attacks are
+common. Before using a VPN, I personally experienced them from my ISP
+frequently.
+
+Note that all scheme sources *except* for `https:` will throw a warning in your
+server log file. If your platform uses them, it really should be updated not
+to.
+
+To add a scheme source parameter to a fetch directive, again you can use the
+`addFetchPolicy($directive, $policy);` method:
+
+    $csp->addFetchPolicy('style-src' 'https:');
+
+That will add the `https:` parameter to the `style-src` directive, appending it
+to any existing directives that may already be there (e.g. `'self'`). It will
+remove an existing parameter of `'none'`.
+
+### Matching Hash Source
+
+In CSP level 2 this was used solely as a secure way to allow inline script and
+styles to load. In CSP level 3 it can also be used as a secure way to allow
+remote style and script sources to load *without* white-listing the entire
+domain the remote resource is hosted on, though honestly the need for that is
+probably rare.
+
+To me it is ambiguous as to whether or not this can be used for resources such
+as images or media, so this class only allows this parameter to be set in the
+`script-src` and `style-src` directives.
+
+Due to the fact that unless a hashing algorithm is broken, a specific hash will
+only correspond to one specific file - it did not make sense for me to support
+this parameter in the `default-src` directive.
+
+There are two ways to add this parameter, both require that have a suitable
+hash of the resource that clients are to allow.
+
+CSP level 3 allows three different algorithm choices, from the
+[SHA-2 family](https://en.wikipedia.org/wiki/SHA-2):
+
+* sha256
+* sha384
+* sha512
+
+CSP level 2 only allows sha256 and that is actually what I recommend you use,
+not just for CSP level 2 compatibility but because the result is a smaller
+string. Technically that means a collision (where more than one file has the
+same hash) is more likely, but with any of those algorithms, a collision is
+only going to occur if the hashing algorithm is broken. So far, there is no
+evidence that any hashing algorithms in the SHA-2 family have been broken.
+
+It may ‘feel safer’ to use the longer hashes, but really that is just a human
+emotion that bigger is better. All three are sufficiently big enough to resist
+a brute force collision attack, an intentional collision will only occur if
+they are actually broken.
+
+SHA-2 is susceptible to a length extension attack but that is not relevant to
+a digest hash, that involves a cryptography secret that a digest hash simply
+does not have.
+
+Anyway I recommend just using sha256 for a hash source parameter.
+
+The CSP specifications requires the hash be base64 encoded. The class here
+will convert a hex encoded hash to base64 for you.
+
+For inline scripts, the hash needs to be a hash of EVERYTHING between the
+opening `<script>` tag and the closing `</script>` tag *including* any newline
+characters directly after the opening tag or before the closing tag. For
+example:
+
+    <script type="application/javascript">
+    window.alert('Hello, World!');
+    </script>
+
+A hash of that script would be of a string that starts with the newline
+directly after `<script type="application/javascript">` and ends with the
+newline directly before the `</scripr>`.
+
+You can generate the hash with the php `hash()` function:
+
+    $myhash = hash('sha256', $string, false);
+
+The variable `$myhash` will now contain a hex encoded string of the hash.
+
+While the class will convert that to base64 for you, if you prefer you can do
+it yourself:
+
+    $raw = hash('sha256', $string, true);
+    $myhash = base64enc($raw);
+
+That will result in a base64 encoded hash string instead of hex encoded.
+
+If the string is static, honestly I personally would create an object that
+contains the string and the hash and cache it with a PSR-16 cache engine
+(such as
+[SimpleCacheAPCu](https://github.com/AliceWonderMiscreations/SimpleCacheAPCu) or
+[SimpleCacheRedis](https://github.com/AliceWonderMiscreations/SimpleCacheRedis))
+so that it the web app does not constantly need to calculate the hash every
+time the page is served.
+
+Anyway, when you have the hash, there are two ways to add it as a CSP
+parameter.
+
+__Method One: Create The Policy Parameter__
+
+You can create the policy parameter yourself by specifying which of the three
+hashing algorithms you used, adding a dash, and then the hash. For example:
+
+    $policyParam = 'sha256-' . $myhash;
+    $csp->addFetchPolicy('script-src', $policyParam);
+
+Again it is okay if `$myhash` is hex, the class will convert it for you.
+
+The second way is to use a public property specifically created for adding a
+hash policy parameter, the `addScriptHash(string $algo, string $hash)` method.
+
+The first argument is the algorithm, the second is the hash.
 
 
 
