@@ -424,6 +424,11 @@ directive directly. There are two ways to do that:
     $policyNonce = 'nonce-' . $nonce;
     $csp->addFetchPolicy('script-src', $policyNonce);
 
+The second way, and the way that I would when starting with an application that
+uses inline scripts:
+
+    $csp->addNonce('script-src', $nonce);
+
 
 
 

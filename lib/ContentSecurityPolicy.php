@@ -689,7 +689,7 @@ class ContentSecurityPolicy
      *
      * @return bool True on success, False on failure
      */
-    protected function addNonce(string $directive, string $nonce)
+    public function addNonce(string $directive, string $nonce): bool
     {
         $nonce = trim($nonce);
         if (! $this->validateNonce($nonce)) {
