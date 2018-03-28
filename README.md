@@ -43,8 +43,8 @@ Directives are usually classified into five different categories:
 
 1. __Fetch Directives__  
   These directives specify rules regarding where a resource is allowed to come
-  from. At least presently, it is easy to distinguish fetch directives from the
-  other kind of directives because the directive name *always* ends with `-src`
+  from. At least presently, it is easy to distinguish fetch directives from
+  other kinds of directives because the directive name *always* ends with `-src`
   and non-fetch directive names *never* end in `-src`. There is a special fetch
   directive called `default-src` that sets the policy for other fetch
   directives when they are not explicitly defined.
@@ -111,8 +111,8 @@ or
 
     $csp = new CSP("'self' *.cdn.example.com");
 
-However, the class does not require it. It identifies when a parameter is a
-keyword that needs single quotes around it when the header is sent.
+However, the class does not require it. The class identifies when a parameter
+is a keyword that needs single quotes around it when the header is sent.
 
 When no argument (or `null`) is fed to the constructor, several relatively safe
 defaults kick in.
@@ -165,7 +165,7 @@ The following class public methods apply to CSP fetch directive:
   false on failure.
 
 * `public function addNonce(string $directive, string $nonce): bool`  
-  Adds a nonce to the `default-src`, `default-script`, or `default-script`
+  Adds a nonce to the `default-src`, `default-script`, or `default-style`
   directive. The nonce must be at least 128 bit and base64 encoded.
 
 * `public function addFetchPolicy(string $directive, string $policy): bool`  
