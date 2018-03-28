@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Test suite for \AWonderPHP\ContentSecurityPolicy
+ * Test suite for \AWonderPHP\ContentSecurityPolicy.
  *
  * @package AWonderPHP/ContentSecurityPolicy
  * @author  Alice Wonder <paypal@domblogger.net>
@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 final class FetchDirectiveStyleSrcTest extends TestCase
 {
     /**
-     * Tests header output when explicitly set to *
+     * Tests header output when explicitly set to *.
      *
      * @return void
      */
@@ -31,10 +31,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParameterWildcardForEverything()
 
-
-  
     /**
-     * Tests header output when explicitly set to 'self'
+     * Tests header output when explicitly set to 'self'.
      *
      * @return void
      */
@@ -49,10 +47,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParameterSelf()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'none'
+     * Tests header output when explicitly set to 'none'.
      *
      * @return void
      */
@@ -67,10 +63,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParameterNone()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'https:'
+     * Tests header output when explicitly set to 'https:'.
      *
      * @return void
      */
@@ -85,10 +79,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testSchemeParamaterHttps()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self https:'
+     * Tests header output when explicitly set to 'self https:'.
      *
      * @return void
      */
@@ -105,10 +97,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParamatersSelfAndSchemeHttps()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self https:' then set to 'none'
+     * Tests header output when explicitly set to 'self https:' then set to 'none'.
      *
      * @return void
      */
@@ -127,10 +117,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testResetParamatersToNone()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self https:' then set to 'none'
+     * Tests header output when explicitly set to 'self https:' then set to 'none'.
      *
      * @return void
      */
@@ -149,10 +137,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testResetParametersToSelf()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self example.org'
+     * Tests header output when explicitly set to 'self example.org'.
      *
      * @return void
      */
@@ -169,10 +155,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParamatersSelfAndHostname()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self example.org:443'
+     * Tests header output when explicitly set to 'self example.org:443'.
      *
      * @return void
      */
@@ -189,10 +173,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParamatersSelfAndHostnameWithPort()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self https://example.org'
+     * Tests header output when explicitly set to 'self https://example.org'.
      *
      * @return void
      */
@@ -209,9 +191,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParametersSelfAndSchemeWithHostname()
 
-    
     /**
-     * Tests header output when explicitly set to 'self https://example.org:443'
+     * Tests header output when explicitly set to 'self https://example.org:443'.
      *
      * @return void
      */
@@ -228,10 +209,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParametersSelfAndSchemeWithHostnameWithPort()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self *.example.org'
+     * Tests header output when explicitly set to 'self *.example.org'.
      *
      * @return void
      */
@@ -248,9 +227,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParametersSelfWithWildcardInHostname()
 
-    
     /**
-     * Tests header output when explicitly set to 'self *.example.org:443'
+     * Tests header output when explicitly set to 'self *.example.org:443'.
      *
      * @return void
      */
@@ -267,10 +245,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParametersSelfWithWildcardInHostnameWithPort()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self *.example.org:*'
+     * Tests header output when explicitly set to 'self *.example.org:*'.
      *
      * @return void
      */
@@ -287,10 +263,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParametersSelfWithWildcardInHostnameAndInPort()
 
-
-    
     /**
-     * Tests header output when explicitly set to 'self https://*.example.org:*'
+     * Tests header output when explicitly set to 'self https://*.example.org:*'.
      *
      * @return void
      */
@@ -307,9 +281,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testParametersSelfWithSchemeAndWildcardInHostnameAndInPort()
 
-    
     /**
-     * Tests header output when copying default and appending
+     * Tests header output when copying default and appending.
      *
      * @return void
      */
@@ -340,9 +313,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testStyleSrcUnsafeInline()
 
-    
     /**
-     * Tests header output with hash via addFetchPolicy
+     * Tests header output with hash via addFetchPolicy.
      *
      * @return void
      */
@@ -366,9 +338,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testSrcAddHashViaAddFetchPolicy()
 
-    
     /**
-     * Tests header output with hash via addStyleHash
+     * Tests header output with hash via addStyleHash.
      *
      * @return void
      */
@@ -392,9 +363,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testSrcAddHashViaAddStyleHash()
 
-
     /**
-     * Tests header output with nonce via addFetchPolicy
+     * Tests header output with nonce via addFetchPolicy.
      *
      * @return void
      */
@@ -407,9 +377,9 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testScrAddNonceViaAddFetchPolicy()
-    
+
     /**
-     * Tests header output with nonce via addNonce
+     * Tests header output with nonce via addNonce.
      *
      * @return void
      */
@@ -423,7 +393,6 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testScrAddNonceViaAddNonce()
 
-    
     /**
      * Tests header output unsafe-inline then nonce.
      * Nonce should take precedence.
@@ -442,7 +411,6 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
     }//end testStyleSrcUnsafeInlineThenNonce()
 
-    
     /**
      * Tests header output nonce then unsafe-inline.
      * Nonce should take precedence.

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Test suite for \AWonderPHP\ContentSecurityPolicy
+ * Test suite for \AWonderPHP\ContentSecurityPolicy.
  *
  * @package AWonderPHP/ContentSecurityPolicy
  * @author  Alice Wonder <paypal@domblogger.net>
@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 final class FetchDirectiveZzzChildSrcTest extends TestCase
 {
     /**
-     * Test child-src when both frame and worker same as default
+     * Test child-src when both frame and worker same as default.
      *
      * @return void
      */
@@ -33,7 +33,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
     }//end testChildSrcFrameWorkerSameAsDefault()
 
     /**
-     * Test child-src when both frame and worker same but different than default
+     * Test child-src when both frame and worker same but different than default.
      *
      * @return void
      */
@@ -49,7 +49,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
     }//end testChildSrcFrameWorkerSameButNotDefault()
 
     /**
-     * Test child-src when frame and worker differ from each other and from self
+     * Test child-src when frame and worker differ from each other and from self.
      *
      * @return void
      */
@@ -64,7 +64,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
     }//end testChildSrcFrameAndWorkerAndDefaultAllDiffer()
 
     /**
-     * Test child-src when default self, frame url, worker none
+     * Test child-src when default self, frame url, worker none.
      *
      * @return void
      */
@@ -80,7 +80,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
     }//end testChildSrcDefaultSelfFrameHostnameWorkerNone()
 
     /**
-     * Test child-src when default none, frame self, worker self url
+     * Test child-src when default none, frame self, worker self url.
      *
      * @return void
      */
