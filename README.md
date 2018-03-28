@@ -357,6 +357,10 @@ The first argument is the algorithm, the second is the hash:
 
     $csp->addScriptHash('sha256', $myhash);
 
+For the `style-src` directive:
+
+    $csp->addStyleHash('sha256', $myhash);
+
 ### Matching Nonce
 
 In the context of Content Security Policy, a nonce is a token that can not be
@@ -431,7 +435,28 @@ uses inline scripts:
 
     $csp->addNonce('script-src', $nonce);
 
+### Strict Dynamic
 
+This parameter appears to only apply the the `script-src` directive and then
+only when the scripts are trusted because of a hash or a nonce.
+
+It looks like what it does is extend that trust to scripts loaded by that
+trusted script rather than validating those loaded scripts.
+
+Sounds kind of dangerous to me, the perfect opportunity for trust to be
+exploited.
+
+If you want to use it:
+
+    $csp->addFetchPolicy('script-src', 'strict-dynamic');
+
+### Report Sample Code
+
+This parameter appears to only apply to the `script-src` directive and only
+when error reporting is enabled.
+
+It instructs the client to include the portion of the violating JavaScript that
+caused a CSP violation in its report about that violation.
 
 
 

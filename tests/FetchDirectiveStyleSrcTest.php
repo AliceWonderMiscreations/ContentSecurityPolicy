@@ -13,7 +13,7 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
 // @codingStandardsIgnoreLine
-final class FetchDirectiveScriptSrcTest extends TestCase
+final class FetchDirectiveStyleSrcTest extends TestCase
 {
     /**
      * Tests header output when explicitly set to *
@@ -22,8 +22,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParameterWildcardForEverything(): void
     {
-        $expected = 'default-src \'none\'; script-src *;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src *;';
+        $directive = 'style-src';
         $policy = '*';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         @$csp->addFetchPolicy($directive, $policy);
@@ -40,8 +40,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParameterSelf(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\';';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\';';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -58,8 +58,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParameterNone(): void
     {
-        $expected = 'default-src \'self\'; script-src \'none\'; plugin-types image/svg+xml application/pdf;';
-        $directive = 'script-src';
+        $expected = 'default-src \'self\'; style-src \'none\'; plugin-types image/svg+xml application/pdf;';
+        $directive = 'style-src';
         $policy = 'none';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addFetchPolicy($directive, $policy);
@@ -76,8 +76,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testSchemeParamaterHttps(): void
     {
-        $expected = 'default-src \'none\'; script-src https:;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src https:;';
+        $directive = 'style-src';
         $policy = 'https:';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -94,8 +94,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParamatersSelfAndSchemeHttps(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' https:;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' https:;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -114,8 +114,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testResetParamatersToNone(): void
     {
-        $expected = 'default-src \'self\'; script-src \'none\'; plugin-types image/svg+xml application/pdf;';
-        $directive = 'script-src';
+        $expected = 'default-src \'self\'; style-src \'none\'; plugin-types image/svg+xml application/pdf;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addFetchPolicy($directive, $policy);
@@ -136,8 +136,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testResetParametersToSelf(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\';';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\';';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -158,8 +158,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParamatersSelfAndHostname(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' example.org;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' example.org;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -178,8 +178,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParamatersSelfAndHostnameWithPort(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' example.org:443;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' example.org:443;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -198,8 +198,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParametersSelfAndSchemeWithHostname(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' https://example.org;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' https://example.org;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -217,8 +217,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParametersSelfAndSchemeWithHostnameWithPort(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' https://example.org:443;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' https://example.org:443;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -237,8 +237,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostname(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' *.example.org;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' *.example.org;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -256,8 +256,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostnameWithPort(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' *.example.org:443;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' *.example.org:443;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -276,8 +276,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostnameAndInPort(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' *.example.org:*;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' *.example.org:*;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -296,8 +296,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testParametersSelfWithSchemeAndWildcardInHostnameAndInPort(): void
     {
-        $expected = 'default-src \'none\'; script-src \'self\' https://*.example.org:*;';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'self\' https://*.example.org:*;';
+        $directive = 'style-src';
         $policy = 'self';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy($directive, $policy);
@@ -315,8 +315,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      */
     public function testCopyDefaultAddHost(): void
     {
-        $expected = 'default-src \'self\' https://cdn.example.net; script-src \'self\' https://cdn.example.net https://*.elsewhere.com; plugin-types image/svg+xml application/pdf;';
-        $directive = 'script-src';
+        $expected = 'default-src \'self\' https://cdn.example.net; style-src \'self\' https://cdn.example.net https://*.elsewhere.com; plugin-types image/svg+xml application/pdf;';
+        $directive = 'style-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://cdn.example.net');
         $csp->copyDefaultFetchPolicy($directive);
         $policy = 'https://*.elsewhere.com';
@@ -330,31 +330,15 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      *
      * @return void
      */
-    public function testScriptSrcUnsafeInline(): void
+    public function testStyleSrcUnsafeInline(): void
     {
-        $expected = 'default-src \'none\'; script-src \'unsafe-inline\';';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'unsafe-inline\';';
+        $directive = 'style-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addFetchPolicy('script-src', 'unsafe-inline');
+        $csp->addFetchPolicy('style-src', 'unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testScriptSrcUnsafeInline()
-
-    
-    /**
-     * Tests header output with unsafe-inline.
-     *
-     * @return void
-     */
-    public function testScriptSrcUnsafeEval(): void
-    {
-        $expected = 'default-src \'none\'; script-src \'unsafe-eval\';';
-        $directive = 'script-src';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        @$csp->addFetchPolicy('script-src', 'unsafe-eval');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }//end testScriptSrcUnsafeEval()
+    }//end testStyleSrcUnsafeInline()
 
     
     /**
@@ -367,46 +351,46 @@ final class FetchDirectiveScriptSrcTest extends TestCase
         $raw = random_bytes(32);
         $hex = bin2hex($raw);
         $b64 = base64_encode($raw);
-        $expected = 'default-src \'none\'; script-src \'sha256-' . $b64 . '\';';
+        $expected = 'default-src \'none\'; style-src \'sha256-' . $b64 . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addFetchPolicy('script-src', 'sha256-' . $hex);
+        $csp->addFetchPolicy('style-src', 'sha256-' . $hex);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
         // reset for base64 test
-        $csp->addFetchPolicy('script-src', 'none');
+        $csp->addFetchPolicy('style-src', 'none');
         $actual = $csp->buildHeader();
         $this->assertEquals('default-src \'none\';', $actual);
         // base64 test
-        $csp->addFetchPolicy('script-src', 'sha256-' . $b64);
+        $csp->addFetchPolicy('style-src', 'sha256-' . $b64);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testSrcAddHashViaAddFetchPolicy()
 
     
     /**
-     * Tests header output with hash via addScriptHash
+     * Tests header output with hash via addStyleHash
      *
      * @return void
      */
-    public function testSrcAddHashViaAddScriptHash(): void
+    public function testSrcAddHashViaAddStyleHash(): void
     {
         $raw = random_bytes(32);
         $hex = bin2hex($raw);
         $b64 = base64_encode($raw);
-        $expected = 'default-src \'none\'; script-src \'sha256-' . $b64 . '\';';
+        $expected = 'default-src \'none\'; style-src \'sha256-' . $b64 . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addScriptHash('sha256', $hex);
+        $csp->addStyleHash('sha256', $hex);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
         // reset for base64 test
-        $csp->addFetchPolicy('script-src', 'none');
+        $csp->addFetchPolicy('style-src', 'none');
         $actual = $csp->buildHeader();
         $this->assertEquals('default-src \'none\';', $actual);
         // base64 test
-        $csp->addScriptHash('sha256', $b64);
+        $csp->addStyleHash('sha256', $b64);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }//end testSrcAddHashViaAddScriptHash()
+    }//end testSrcAddHashViaAddStyleHash()
 
 
     /**
@@ -417,9 +401,9 @@ final class FetchDirectiveScriptSrcTest extends TestCase
     public function testScrAddNonceViaAddFetchPolicy(): void
     {
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
+        $expected = 'default-src \'none\'; style-src \'nonce-' . $nonce . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addFetchPolicy('script-src', 'nonce-' . $nonce);
+        $csp->addFetchPolicy('style-src', 'nonce-' . $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }//end testScrAddNonceViaAddFetchPolicy()
@@ -432,9 +416,9 @@ final class FetchDirectiveScriptSrcTest extends TestCase
     public function testScrAddNonceViaAddNonce(): void
     {
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
+        $expected = 'default-src \'none\'; style-src \'nonce-' . $nonce . '\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addNonce('script-src', $nonce);
+        $csp->addNonce('style-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }
@@ -445,14 +429,14 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      *
      * @return void
      */
-    public function testScriptSrcUnsafeInlineThenNonce(): void
+    public function testStyleSrcUnsafeInlineThenNonce(): void
     {
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'nonce-' . $nonce . '\';';
+        $directive = 'style-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addFetchPolicy('script-src', 'unsafe-inline');
-        $csp->addNonce('script-src', $nonce);
+        $csp->addFetchPolicy('style-src', 'unsafe-inline');
+        $csp->addNonce('style-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }
@@ -463,76 +447,21 @@ final class FetchDirectiveScriptSrcTest extends TestCase
      *
      * @return void
      */
-    public function testScriptSrcNonceThenUnsafeInline(): void
+    public function testStyleSrcNonceThenUnsafeInline(): void
     {
         $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\';';
-        $directive = 'script-src';
+        $expected = 'default-src \'none\'; style-src \'nonce-' . $nonce . '\';';
+        $directive = 'style-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addNonce('script-src', $nonce);
-        $csp->addFetchPolicy('script-src', 'unsafe-inline');
+        $csp->addNonce('style-src', $nonce);
+        $csp->addFetchPolicy('style-src', 'unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
     }
     
-    /**
-     * Set the strict-dynamic parameter in script-src.
-     *
-     * @return void
-     */
-    public function testScriptSetStrictDynamic(): void
-    {
-        $nonce = \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy::generateNonce();
-        $hash = hash('sha256', $nonce, true);
-        $b64 = base64_encode($hash);
-        // first test, should fail to set without a nonce or hash set
-        $expected = 'default-src \'none\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addFetchPolicy('script-src', 'strict-dynamic');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-        // second test - should add the parameter if nonce present
-        $expected = 'default-src \'none\'; script-src \'nonce-' . $nonce . '\' \'strict-dynamic\';';
-        $csp->addNonce('script-src', $nonce);
-        $csp->addFetchPolicy('script-src', 'strict-dynamic');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-        // wipe the policy for third test
-        $expected = 'default-src \'none\';';
-        $csp->addFetchPolicy('script-src', '\'none\'');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-        // third test - should add the parameter if hash present
-        $expected = 'default-src \'none\'; script-src \'sha256-' . $b64 . '\' \'strict-dynamic\';';
-        $csp->addScriptHash('sha256', $b64);
-        $csp->addFetchPolicy('script-src', 'strict-dynamic');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-    }
     
-    /**
-     * Test header output with report-sample
-     *
-     * @return void
-     */
-    public function testScriptReportSample(): void
-    {
-        // first test - should only apply if reporting enabled
-        $expected = 'default-src \'none\';';
-        $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
-        $csp->addFetchPolicy('script-src', 'report-sample');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-        // second test - add a report uri
-        //  TODO FIXME function to do so not yet written
-        // wipe for third test
-        $expected = 'default-src \'none\';';
-        $csp->addFetchPolicy('script-src', '\'none\'');
-        $actual = $csp->buildHeader();
-        $this->assertEquals($expected, $actual);
-        // third test - add a report-to
-        //  TODO FIXME function to do so not yet written
-    }
+    
+    
      
 
 

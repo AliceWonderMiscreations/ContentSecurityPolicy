@@ -272,6 +272,9 @@ class ContentSecurityPolicy
             case 'strict-dynamic':
                 $policy = '\'strict-dynamic\'';
                 break;
+            case 'report-sample':
+                $policy = '\'report-sample\'';
+                break;
         }
         return $policy;
     }//end adjustPolicy()
@@ -685,6 +688,52 @@ class ContentSecurityPolicy
     }//end addScriptHash()
     
     /**
+     * Adds style hash. Throws exception if invalid.
+     *
+     * @param string $algo The hash algorithm.
+     * @param string $hash The hash.
+     *
+     * @return bool
+     */
+    public function addStyleHash(string $algo, string $hash): bool
+    {
+        $algo = trim(strtolower($algo));
+        if (! in_array($algo, array('sha256', 'sha384', 'sha512'))) {
+            throw InvalidArgumentException::badAlgo();
+        }
+        if (ctype_xdigit($hash)) {
+            $raw = hex2bin($hash);
+            $hash = base64_encode($raw);
+        }
+        if (base64_encode(base64_decode($hash)) !== $hash) {
+            throw InvalidArgumentException::badHash();
+        }
+        switch ($algo) {
+            case 'sha384':
+                $hashLength = 64;
+                break;
+            case 'sha512':
+                $hashLength = 88;
+                break;
+            default:
+                $hashLength = 44;
+                break;
+        }
+        if (strlen($hash) !== $hashLength) {
+            throw InvalidArgumentException::badHash();
+        }
+        $policy = '\'' . $algo . '-' . $hash . '\'';
+        if (count($this->styleSrc) > 0) {
+            if ($this->styleSrc[0] === '\'none\'') {
+                $this->styleSrc[0] = $policy;
+                return true;
+            }
+        }
+        $this->styleSrc[] = $policy;
+        return true;
+    }//end addScriptHash()
+    
+    /**
      * Adds a nonce to script or style policy.
      *
      * @param string $directive The directive to add the nonce to.
@@ -983,6 +1032,9 @@ class ContentSecurityPolicy
                 if ($directive === 'script-src') {
                     return $this->addScriptHash($algo, $hash);
                 }
+                if ($directive === 'style-src') {
+                    return $this->addStyleHash($algo, $hash);
+                }
                 break;
             case 'nonce':
                 $arr = explode('-', $policy);
@@ -990,7 +1042,19 @@ class ContentSecurityPolicy
                 return $this->addNonce($directive, $nonce);
               break;
             default:
-               //url
+                if($directive === 'script-src') {
+                    if ($policy === '\'strict-dynamic\'') {
+                        return $this->setStrictDynamic('script-src');
+                    }
+                    if ($policy === '\'report-sample\'') {
+                        if(! is_null($this->reportUri)) {
+                            return $this->setPolicyParameter('script-src', $policy);
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+                // default to url
                 return $this->addHostPolicy($directive, $policy);
         }
         return false;
@@ -1219,11 +1283,7 @@ class ContentSecurityPolicy
         }
         
         if (! is_null($this->reportUri)) {
-            $h = 'report-uri';
-            if ($this->reportOnly) {
-                $h .= '-ReportOnly';
-            }
-            $directives[] = $h . ' ' . $this->reportUri . ';';
+            $directives[] = 'report-uri' . ' ' . $this->reportUri . ';';
         }
         return implode(' ', $directives);
     }//end buildHeader()
@@ -1243,11 +1303,16 @@ class ContentSecurityPolicy
     /**
      * The constructor function
      *
-     * @param null|string $param The optional path to a JSON configuration file or a default
-     *                           policy for default-src.
+     * @param null|string $param      The optional path to a JSON configuration file or a default
+     *                                policy for default-src.
+     * @param bool        $reportOnly Only report violations if True, block violations if False.
+     *                                Defaults to False.
      */
-    public function __construct($param = null)
+    public function __construct($param = null, bool $reportOnly = false)
     {
+        if($reportOnly) {
+            $this->reportOnly = true;
+        }
         if (is_null($param)) {
             $this->setPolicyParameter('script-src', '\'self\'');
             $this->setPolicyParameter('connect-src', '\'self\'');
