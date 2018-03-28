@@ -125,6 +125,13 @@ Please note those defaults *only* take place when the `default-src` directive
 is not explicitly set in the constructor. Explicitly setting `default-src` to
 `'none'` will __not__ result in those other defaults being set.
 
+### Constructor Parameters
+
+The constructor takes two optional parameters. The first is string when not
+null and is used to define the `default-src` directive. The seconds is a
+Boolean and is used to define whether or not you only want to run in report
+mode rather than blocking violations. It defaults to False (block mode).
+
 
 Setting Fetch Directive Policy Parameters
 -----------------------------------------
@@ -144,6 +151,36 @@ directives when the CSP header is built.
 
 All other fetch directives can be set with public methods that belong to this
 class.
+
+### Fetch Public Methods
+
+The following class public methods apply to CSP fetch directive:
+
+* `public function addScriptHash(string $algo, string $hash): bool`  
+  Adds a hash parameter to the `script-src` directive. Returns True on success,
+  false on failure.
+
+* `addStyleHash(string $algo, string $hash): bool`  
+  Adds a hash parameter to the `style-src` directive. Returns True on success,
+  false on failure.
+
+* `public function addNonce(string $directive, string $nonce): bool`  
+  Adds a nonce to the `default-src`, `default-script`, or `default-script`
+  directive. The nonce must be at least 128 bit and base64 encoded.
+
+* `public function addFetchPolicy(string $directive, string $policy): bool`  
+  Adds a policy parameter to the specified fetch directive. It will not add a
+  policy parameter to `default-src` or `child-src`. Returns True on success,
+  False on failure.
+
+* `copyDefaultFetchPolicy(string $directive): bool`  
+  Copies the contents of the `default-src` directive into the specified
+  directive. Returns True on success, False on failure.
+
+* `public static function generateNonce(int $bytes = 16): string`  
+  Generates a nonce that is at least 16 bytes (128-bit) using a
+  cryptographically secure random number generator. Returns a base64 encoded
+  string.
 
 ### Basal Keyword Parameters
 
