@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * An implementation of Content Security Policy
+ * An implementation of Content Security Policy.
  *
  * @package AWonderPHP/ContentSecurityPolicy
  * @author  Alice Wonder <paypal@domblogger.net>
@@ -23,31 +23,7 @@ namespace AWonderPHP\ContentSecurityPolicy;
 class ContentSecurityPolicy
 {
     /**
-     * Valid CSP Directives except for default-src.
-     *
-     * @var array
-     */
-    protected $validDirectives = array(
-        'connect-src',
-        'font-src',
-        'frame-src',
-        'img-src',
-        'manifest-src',
-        'media-src',
-        'object-src',
-        'script-src',
-        'style-src',
-        'worker-src',
-        'base-uri',
-        'plugin-types',
-        'sandbox',
-        'form-action',
-        'frame-ancestors',
-        'report-uri'
-    );
-    
-    /**
-     * Valid CSP Fetch Directives excluding default-src
+     * Valid CSP Fetch Directives excluding default-src.
      *
      * @var array
      */
@@ -63,7 +39,7 @@ class ContentSecurityPolicy
         'style-src',
         'worker-src'
     );
-    
+
     /**
      * Experimental CSP Directives not yet widely supported.
      *
@@ -74,30 +50,30 @@ class ContentSecurityPolicy
         'navigation-to',
         'report-to'
     );
-    
+
     /* Fetch Directives */
-    
+
     /**
      * Serves as a fallback for the other fetch directives.
      *
      * @var array
      */
     protected $defaultSrc = array('\'none\'');
-    
+
     /**
      * Restricts the URLs which can be loaded using script interfaces.
      *
      * @var array
      */
     protected $connectSrc = array();
-    
+
     /**
      * Specifies valid sources for fonts loaded using @font-face.
      *
      * @var array
      */
     protected $fontSrc = array();
-    
+
     /**
      * Specifies valid sources for nested browsing contexts loading using elements such as
      * <frame> and <iframe>.
@@ -105,14 +81,14 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $frameSrc = array();
-    
+
     /**
      * Specifies valid sources of images and favicons.
      *
      * @var array
      */
     protected $imgSrc = array();
-    
+
     /**
      * Specifies valid sources of application manifest files.
      *
@@ -127,21 +103,21 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $mediaSrc = array();
-    
+
     /**
      * Specifies valid sources for the <object>, <embed>, and <applet> elements.
      *
      * @var array
      */
     protected $objectSrc = array();
-    
+
     /**
      * Specifies valid sources for JavaScript.
      *
      * @var array
      */
     protected $scriptSrc = array();
-    
+
     /**
      * Specifies valid sources for stylesheets.
      *
@@ -155,16 +131,16 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $workerSrc = array();
-    
+
     /* Document Directives */
-    
+
     /**
      * Restricts the URLs which can be used in a document's <base> element.
      *
      * @var array
      */
     protected $baseUri = array();
-    
+
     /**
      * Restricts the set of plugins that can be embedded into a document by limiting the types
      * of resources which can be loaded.
@@ -177,14 +153,14 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $pluginTypes = array('image/svg+xml', 'application/pdf');
-    
+
     /**
      * Enables a sandbox for the requested resource similar to the <iframe> sandbox attribute.
      *
      * @var array
      */
     protected $sandbox = array();
-    
+
     /**
      * Allowed sandbox values
      *
@@ -202,9 +178,9 @@ class ContentSecurityPolicy
         'allow-scripts',
         'allow-top-navigation'
         );
-        
+
     /* Navigation Directives */
-    
+
     /**
      * Restricts the URLs which can be used as the target of a form submissions from a given
      * context.
@@ -212,7 +188,7 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $formAction = array();
-    
+
     /**
      * Specifies valid parents that may embed a page using <frame>, <iframe>, <object>,
      * <embed>, or <applet>.
@@ -220,9 +196,9 @@ class ContentSecurityPolicy
      * @var array
      */
     protected $frameAncestors = array();
-    
+
     /* Reporting Directives */
-    
+
     /**
      * Instructs the user agent to report attempts to violate the Content Security Policy.
      * These violation reports consist of JSON documents sent via an HTTP POST request to the
@@ -233,7 +209,7 @@ class ContentSecurityPolicy
      * @var null|string
      */
     protected $reportUri = null;
-    
+
     /**
      * Changes Content-Security-Policy header to Content-Security-Policy-Report-Only so that
      * the resource violation is reported but is not actually blocked.
@@ -241,15 +217,15 @@ class ContentSecurityPolicy
      * @var bool
      */
     protected $reportOnly = false;
-    
+
     /**
-     * Adjust the policy to add single upquote where needed
+     * Adjust the policy to add single upquote where needed.
      *
      * @param string $policy The policy string to adjust.
      *
      * @return string
      */
-    protected function adjustPolicy($policy)
+    protected function adjustPolicy(string $policy): string
     {
         $policy = trim($policy);
         $s = array('/^\'/', '/\'$/');
@@ -279,7 +255,6 @@ class ContentSecurityPolicy
         return $policy;
     }//end adjustPolicy()
 
-    
     /**
      * Adds unsafe-inline or unsafe-eval to script/style directive.
      *
@@ -288,7 +263,7 @@ class ContentSecurityPolicy
      *
      * @return bool True on success, False on failure.
      */
-    protected function addUnsafe($directive, $unsafe): bool
+    protected function addUnsafe(string $directive, string $unsafe): bool
     {
         if (! in_array($unsafe, array('\'unsafe-inline\'', '\'unsafe-eval\''))) {
             return false;
@@ -327,75 +302,12 @@ class ContentSecurityPolicy
         }
         return false;
     }//end addUnsafe()
-    
-    /**
-     * Checks to see whether inline scripts are allowed in current policy
-     *
-     * @return bool
-     */
-    protected function checkInlineScriptsAllowed()
-    {
-        $n = count($this->scriptSrc);
-        switch ($n) {
-            case 0:
-                $defaultPolicy = $this->defaultSrc[0];
-                if ($defaultPolicy === '\'none\'') {
-                    return false;
-                }
-                break;
-            case 1:
-                $scriptPolicy = $this->scriptSrc[0];
-                if ($scriptPolicy === '\'none\'') {
-                    return false;
-                }
-                break;
-        }
-        return true;
-    }//end checkInlineScriptsAllowed()
 
-    
-    /**
-     * Checks to see whether inline style are allowed in current policy
-     *
-     * @return bool
-     */
-    protected function checkInlineStyleAllowed()
-    {
-        $n = count($this->styleSrc);
-        switch ($n) {
-            case 0:
-                $defaultPolicy = $this->defaultSrc[0];
-                if ($defaultPolicy === '\'none\'') {
-                    return false;
-                }
-                break;
-            case 1:
-                $scriptPolicy = $this->styleSrc[0];
-                if ($scriptPolicy === '\'none\'') {
-                    return false;
-                }
-                break;
-        }
-        return true;
-    }//end checkInlineStyleAllowed()
-
-    
-    
-    
-    
-
-
-
-
-
-
-    /* new */
-    
     /**
      * Generates a child-src directive that is nutshell a union between frame-src and worker-src
-     * This is produce a compatibility directive for CSP level 2 clients
+     * This is produce a compatibility directive for CSP level 2 clients.
      *
-     * @return array The directive parameters
+     * @return array The directive parameters.
      */
     protected function generateChildFetchDirective(): array
     {
@@ -525,7 +437,6 @@ class ContentSecurityPolicy
         return $childSrc;
     }//end generateChildFetchDirective()
 
-    
     /**
      * Determines if the array is set to 'none'.
      *
@@ -533,7 +444,7 @@ class ContentSecurityPolicy
      *
      * @return bool True if set to 'none', False if not.
      */
-    protected function checkForNone($arr): bool
+    protected function checkForNone(array $arr): bool
     {
         if (isset($arr[0])) {
             if ($arr[0] === '\'none\'') {
@@ -542,9 +453,9 @@ class ContentSecurityPolicy
         }
         return false;
     }//end checkForNone()
-    
+
     /**
-     * Determines whether or not object tags are allowed
+     * Determines whether or not object tags are allowed.
      *
      * @return bool True if allowed, False if not.
      */
@@ -571,8 +482,6 @@ class ContentSecurityPolicy
         return false;
     }//end objectsAllowed()
 
-
-    
     /**
      * Adds a policy to a directive or sets it if set to 'none'.
      *
@@ -581,7 +490,7 @@ class ContentSecurityPolicy
      *
      * @return bool
      */
-    protected function setPolicyParameter($directive, $policy)
+    protected function setPolicyParameter(string $directive, string $policy)
     {
         switch ($directive) {
             case 'default-src':
@@ -690,7 +599,6 @@ class ContentSecurityPolicy
         return true;
     }//end setPolicyParameter()
 
-    
     /**
      * Defines the policy to the specified policy keyword. This is for
      * keywords where the keyword implies first or only policy for directive.
@@ -700,7 +608,7 @@ class ContentSecurityPolicy
      *
      * @return bool
      */
-    protected function addPolicyKeyword($directive, $keyword): bool
+    protected function addPolicyKeyword(string $directive, string $keyword): bool
     {
         if (! in_array($keyword, array('\'self\'', '\'none\''))) {
             return false;
@@ -751,15 +659,14 @@ class ContentSecurityPolicy
         return true;
     }//end addPolicyKeyword()
 
-  
     /**
      * Verifies that we have a valid nonce.
      *
      * @param string $nonce the nonce to test.
      *
-     * @return bool True when valid, False when invalid
+     * @return bool True when valid, False when invalid.
      */
-    public function validateNonce(string $nonce): bool
+    protected function validateNonce(string $nonce): bool
     {
         if (base64_encode(base64_decode($nonce, true)) !== $nonce) {
             return false;
@@ -819,7 +726,7 @@ class ContentSecurityPolicy
         $this->scriptSrc[] = $policy;
         return true;
     }//end addScriptHash()
-    
+
     /**
      * Adds style hash. Throws exception if invalid.
      *
@@ -865,7 +772,7 @@ class ContentSecurityPolicy
         $this->styleSrc[] = $policy;
         return true;
     }//end addScriptHash()
-    
+
     /**
      * Adds a nonce to script or style policy.
      *
@@ -934,7 +841,7 @@ class ContentSecurityPolicy
         }
         return true;
     }//end addNonce()
-    
+
     /**
      * Set the 'strict-dynamic' parameter to the script-src or default-src directive.
      *
@@ -997,7 +904,6 @@ class ContentSecurityPolicy
         return false;
     }//end setStrictDynamic()
 
-    
     /**
      * Add a host to a directive policy
      *
@@ -1006,7 +912,7 @@ class ContentSecurityPolicy
      *
      * @return bool
      */
-    protected function addHostPolicy($directive, $url)
+    protected function addHostPolicy(string $directive, string $url)
     {
         if ($url === '*') {
             trigger_error('Setting a host policy parameter to \'*\' is allowed but is not secure.', E_USER_NOTICE);
@@ -1080,16 +986,15 @@ class ContentSecurityPolicy
         return $this->setPolicyParameter($directive, $policy);
     }//end addHostPolicy()
 
-    
     /**
-     * Add or create a policy to a fetch directive
+     * Add or create a policy to a fetch directive.
      *
      * @param string $directive The CSP policy directive.
      * @param string $policy    The CSP policy parameter.
      *
-     * @return bool True on success, False on failure
+     * @return bool True on success, False on failure.
      */
-    public function addFetchPolicy($directive, $policy)
+    public function addFetchPolicy(string $directive, string $policy): bool
     {
         $directive = trim(strtolower($directive));
         $policy = $this->adjustPolicy($policy);
@@ -1193,12 +1098,6 @@ class ContentSecurityPolicy
         return false;
     }//end addFetchPolicy()
 
-
-    
-    
-    
-
-
     /**
      * This generates a nonce. A nonce for CSP is a different concept than with cryptography.
      *
@@ -1213,7 +1112,7 @@ class ContentSecurityPolicy
      *
      * @param int $bytes How many bytes should be used. Defaults to 8.
      *
-     * @return string A base64 encoded random nonce
+     * @return string A base64 encoded random nonce.
      */
     public static function generateNonce(int $bytes = 16): string
     {
@@ -1223,9 +1122,9 @@ class ContentSecurityPolicy
         $random = random_bytes($bytes);
         return base64_encode($random);
     }//end generateNonce()
-    
+
     /**
-     * Copies the content of the default-src directive into the specified directive
+     * Copies the content of the default-src directive into the specified directive.
      *
      * @param string $directive The directive to copy default-src into.
      *
@@ -1272,21 +1171,26 @@ class ContentSecurityPolicy
         return true;
     }//end copyDefaultFetchPolicy()
 
-
     /**
-     * Creates the CSP header string
+     * Creates the CSP header string.
+     *
+     * @param bool $generateChildSrc Whether or not to create the child-src directive if needed.
      *
      * @return string
      */
-    public function buildHeader(): string
+    public function buildHeader(bool $generateChildSrc = true): string
     {
         $directives = array();
         $directives[] = 'default-src ' . implode(' ', $this->defaultSrc) . ';';
-        
+
         /* These inherit from default if empty */
-        
+
         /* child-src is deprecated but some browsers may still need it */
-        $childSrc = $this->generateChildFetchDirective();
+        if ($generateChildSrc) {
+            $childSrc = $this->generateChildFetchDirective();
+        } else {
+            $childSrc = array();
+        }
         if ($childSrc === $this->defaultSrc) {
             $childSrc = array();
         } else {
@@ -1302,8 +1206,7 @@ class ContentSecurityPolicy
                 $directives[] = 'child-src ' . implode(' ', $childSrc) . ';';
             }
         }
-        
-        
+
         if ($this->connectSrc !== $this->defaultSrc) {
             if (count($this->connectSrc) > 0) {
                 $directives[] = 'connect-src ' . implode(' ', $this->connectSrc) . ';';
@@ -1314,7 +1217,7 @@ class ContentSecurityPolicy
                 $directives[] = 'font-src ' . implode(' ', $this->fontSrc) . ';';
             }
         }
-        
+
         // special case due to deprecated childSrc
         $directiveAdded = false;
         if (count($childSrc) > 0) {
@@ -1336,7 +1239,7 @@ class ContentSecurityPolicy
             }
         }
         // end special case
-        
+
         if ($this->imgSrc !== $this->defaultSrc) {
             if (count($this->imgSrc) > 0) {
                 $directives[] = 'img-src ' . implode(' ', $this->imgSrc) . ';';
@@ -1367,7 +1270,7 @@ class ContentSecurityPolicy
                 $directives[] = 'style-src ' . implode(' ', $this->styleSrc) . ';';
             }
         }
-        
+
         // special case due to deprecated childSrc
         $directiveAdded = false;
         if (count($childSrc) > 0) {
@@ -1389,11 +1292,11 @@ class ContentSecurityPolicy
             }
         }
         // end special case
-        
+
         /* These do not inherit from default if empty */
-        
+
         // missing baseURI
-        
+
         if (count($this->pluginTypes) > 0) {
             if ($this->objectsAllowed()) {
                 $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
@@ -1414,19 +1317,27 @@ class ContentSecurityPolicy
         }
         return implode(' ', $directives);
     }//end buildHeader()
-    
+
     /**
      * Sends the content security policy header.
      *
+     * @param bool $generateChildSrc Whether or not to create the child-src directive if needed.
+     *
      * @return void
      */
-    public function sendCspHeader(): void
+    public function sendCspHeader(bool $generateChildSrc = true): void
     {
-        $string = $this->buildHeader();
-        header('Content-Security-Policy: ' . $string);
+        $string = $this->buildHeader($generateChildSrc);
+        $headerName = 'Content-Security-Policy';
+        if (! is_null($this->reportUri)) {
+            if ($this->reportOnly) {
+                $headerName .= '-Report-Only';
+            }
+        }
+        header($headerName . ': ' . $string);
         return;
     }//end sendCspHeader()
-    
+
     /**
      * The constructor function
      *

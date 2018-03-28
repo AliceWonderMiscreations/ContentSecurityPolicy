@@ -55,6 +55,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
      */
     public function testChildSrcFrameAndWorkerAndDefaultAllDiffer(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src https://www.example.org https://worker.example.org; frame-src https://www.example.org; worker-src https://worker.example.org;';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy('frame-src', 'https://www.example.org');
@@ -70,6 +71,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
      */
     public function testChildSrcDefaultSelfFrameHostnameWorkerNone(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\'; child-src https://www.example.org; frame-src https://www.example.org; object-src \'none\'; worker-src \'none\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $csp->addFetchPolicy('object-src', 'none');
@@ -86,6 +88,7 @@ final class FetchDirectiveZzzChildSrcTest extends TestCase
      */
     public function testChildSrcDefaultNoneFrameSelfWorkerSelfHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' https://worker.example.org; frame-src \'self\'; worker-src \'self\' https://worker.example.org;';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('none');
         $csp->addFetchPolicy('frame-src', 'self');

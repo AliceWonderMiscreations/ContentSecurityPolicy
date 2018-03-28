@@ -288,6 +288,7 @@ final class FetchDirectiveImgSrcTest extends TestCase
      */
     public function testCopyDefaultAddHost(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\' https://cdn.example.net; img-src \'self\' https://cdn.example.net https://*.elsewhere.com; plugin-types image/svg+xml application/pdf;';
         $directive = 'img-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://cdn.example.net');

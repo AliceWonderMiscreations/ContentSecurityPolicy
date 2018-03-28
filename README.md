@@ -613,22 +613,23 @@ The `frame-src`, `child-src`, and `worker-src` Directives
 ---------------------------------------------------------
 
 CSP level 1 had a directive called `frame-src` that was used to define rules
-about what could be loaded in `<frame>` and `<iframe>` tags. CSP 1 did not any
-directives to cover [web workers](https://en.wikipedia.org/wiki/Web_worker).
+about what could be loaded in `<frame>` and `<iframe>` tags. CSP level 1 did
+not have any directives to cover
+[web workers](https://en.wikipedia.org/wiki/Web_worker).
 
 In CSP level 2, they deprecated `frame-src` in favor of a directive called
 `child-src` that covered web workers as well. When a resource that was either
-a frame or web worker resource needed to be checked, CSP 2.0 implementing first
-would look for the `child-src` policy, and if that did not exist they would see
-if the deprecated `frame-src` policy was defined, and finally use `default-src`
-as the final fall-back.
+a frame or web worker resource needed to be checked, CSP level 2 implementing
+clients first would look for the `child-src` policy, and if that did not exist
+they would see if the deprecated `frame-src` policy was defined, and finally
+use `default-src` as the final fall-back.
 
 Using a single policy for both frames and web workers really was not a great
 idea, they are different and often served from different places, they really
 did need different policies.
 
 So CSP level 3 (not yet finalized) is deprecating `child-src`, un-deprecating
-`frame-src` and introducing `worker-src`. Browsers implementing it (and some
+`frame-src`, and introducing `worker-src`. Browsers implementing it (and some
 already are) will use `child-src` as a fallback for those two if they are not
 defined before using `default-src`.
 
@@ -651,18 +652,7 @@ it from providing unintended rules in CSP level 3 browsers when either
 if either of those are not defined, they will be defined with the `default-src`
 policy instead of the `child-src` policy.
 
-Hybridizing the `frame-src` and `worker-src` into a `child-src` that works with
-CSP level 2 browsers is *crudely* done right now. Most use case scenarios it
-will work but I can think of a few cases where it will not. I will improve
-that.
-
-Making sure the `child-src` directive this class manufacturers does not
-interfere with CSP level 3 browsers when `frame-src` or `worker-src` is not
-defined is done. The `child-src` directive will be present if one or the other
-is defined, but in cases where CSP level 3 browsers would fall back to
-`default-src` for the definitions in the absence of `child-src`, the
-`default-src` definitions are explicitly used with `frame-src` or `worker-src`
-to prevent that.
+This class does that.
 
 
 

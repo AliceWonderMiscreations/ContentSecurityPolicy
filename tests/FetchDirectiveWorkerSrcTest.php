@@ -54,6 +54,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParameterNone(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\'; child-src \'none\'; frame-src \'self\'; worker-src \'none\'; plugin-types image/svg+xml application/pdf;';
         $directive = 'worker-src';
         $policy = 'none';
@@ -104,6 +105,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testResetParamatersToNone(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\'; child-src \'none\'; frame-src \'self\'; worker-src \'none\'; plugin-types image/svg+xml application/pdf;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -144,6 +146,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParamatersSelfAndHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' example.org; frame-src \'none\'; worker-src \'self\' example.org;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -162,6 +165,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParamatersSelfAndHostnameWithPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' example.org:443; frame-src \'none\'; worker-src \'self\' example.org:443;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -180,6 +184,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParametersSelfAndSchemeWithHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' https://example.org; frame-src \'none\'; worker-src \'self\' https://example.org;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -198,6 +203,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParametersSelfAndSchemeWithHostnameWithPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' https://example.org:443; frame-src \'none\'; worker-src \'self\' https://example.org:443;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -216,6 +222,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' *.example.org; frame-src \'none\'; worker-src \'self\' *.example.org;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -234,6 +241,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostnameWithPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' *.example.org:443; frame-src \'none\'; worker-src \'self\' *.example.org:443;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -252,6 +260,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostnameAndInPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' *.example.org:*; frame-src \'none\'; worker-src \'self\' *.example.org:*;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -270,6 +279,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testParametersSelfWithSchemeAndWildcardInHostnameAndInPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; child-src \'self\' https://*.example.org:*; frame-src \'none\'; worker-src \'self\' https://*.example.org:*;';
         $directive = 'worker-src';
         $policy = 'self';
@@ -288,6 +298,7 @@ final class FetchDirectiveWorkerSrcTest extends TestCase
      */
     public function testCopyDefaultAddHost(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\' https://cdn.example.net; child-src \'self\' https://cdn.example.net https://*.elsewhere.com; frame-src \'self\' https://cdn.example.net; worker-src \'self\' https://cdn.example.net https://*.elsewhere.com; plugin-types image/svg+xml application/pdf;';
         $directive = 'worker-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://cdn.example.net');

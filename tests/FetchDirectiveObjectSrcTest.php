@@ -144,6 +144,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParamatersSelfAndHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' example.org; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -162,6 +163,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParamatersSelfAndHostnameWithPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' example.org:443; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -180,6 +182,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParametersSelfAndSchemeWithHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' https://example.org; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -198,6 +201,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParametersSelfAndSchemeWithHostnameWithPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' https://example.org:443; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -216,6 +220,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostname(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' *.example.org; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -234,6 +239,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostnameWithPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' *.example.org:443; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -252,6 +258,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParametersSelfWithWildcardInHostnameAndInPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' *.example.org:*; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -270,6 +277,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testParametersSelfWithSchemeAndWildcardInHostnameAndInPort(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; object-src \'self\' https://*.example.org:*; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $policy = 'self';
@@ -288,6 +296,7 @@ final class FetchDirectiveObjectSrcTest extends TestCase
      */
     public function testCopyDefaultAddHost(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\' https://cdn.example.net; object-src \'self\' https://cdn.example.net https://*.elsewhere.com; plugin-types image/svg+xml application/pdf;';
         $directive = 'object-src';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://cdn.example.net');

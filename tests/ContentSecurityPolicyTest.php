@@ -22,6 +22,7 @@ final class ContentSecurityPolicyTest extends TestCase
      */
     public function testBasicDefault(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'none\'; connect-src \'self\'; img-src \'self\'; media-src \'self\'; script-src \'self\'; style-src \'self\';';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy();
         $actual = $csp->buildHeader();
@@ -100,6 +101,7 @@ final class ContentSecurityPolicyTest extends TestCase
      */
     public function testDefaultSelfPlusSchemeAndHostnameAndUnsafeInline(): void
     {
+        // @codingStandardsIgnoreLine
         $expected = 'default-src \'self\' https://example.org \'unsafe-inline\'; plugin-types image/svg+xml application/pdf;';
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self https://example.org unsafe-inline');
         $actual = $csp->buildHeader();
