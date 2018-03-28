@@ -391,7 +391,140 @@ class ContentSecurityPolicy
 
     /* new */
     
-    
+    /**
+     * Generates a child-src directive that is nutshell a union between frame-src and worker-src
+     * This is produce a compatibility directive for CSP level 2 clients
+     *
+     * @return array The directive parameters
+     */
+    protected function generateChildFetchDirective(): array
+    {
+        $childSrc = array();
+        $frameCount = count($this->frameSrc);
+        $workerCount = count($this->workerSrc);
+        if (($frameCount + $workerCount) === 0) {
+            return array();
+        }
+        if ($frameCount === 0) {
+            $childSrc = $this->workerSrc;
+        }
+        if ($workerCount === 0) {
+            $childSrc = $this->frameSrc;
+        }
+        if ($this->frameSrc === $this->workerSrc) {
+            $childSrc = $this->frameSrc;
+        }
+        if (count($childSrc) > 0) {
+            return $childSrc;
+        }
+        $scheme = array();
+        $otherKeyword = array();
+        $host = array();
+        foreach ($this->frameSrc as $param) {
+            $a = 0;
+            if ($param === '\'none\'') {
+                $a++;
+            }
+            if ($a === 0) {
+                if ($param === '\'self\'') {
+                    if (! in_array($param, $childSrc)) {
+                        $childSrc[] = $param;
+                    }
+                    $a++;
+                }
+            }
+            if ($a === 0) {
+                $test = substr($param, -1);
+                if ($test === ':') {
+                    if (! in_array($param, $scheme)) {
+                        $scheme[] = $param;
+                    }
+                    $a++;
+                }
+            }
+            if ($a === 0) {
+                $test = substr($param, -1);
+                if ($test === '\'') {
+                    if (! in_array($param, $otherKeyword)) {
+                        $otherKeyword[] = $param;
+                    }
+                    $a++;
+                }
+            }
+            if ($a === 0) {
+                $n = substr_count($param, '.');
+                if ($n > 0) {
+                    if (! in_array($param, $host)) {
+                        $host[] = $param;
+                    }
+                    $a++;
+                }
+            }
+        }
+        foreach ($this->workerSrc as $param) {
+            $a = 0;
+            if ($param === '\'none\'') {
+                $a++;
+            }
+            if ($a === 0) {
+                if ($param === '\'self\'') {
+                    if (! in_array($param, $childSrc)) {
+                        $childSrc[] = $param;
+                    }
+                    $a++;
+                }
+            }
+            if ($a === 0) {
+                $test = substr($param, -1);
+                if ($test === ':') {
+                    if (! in_array($param, $scheme)) {
+                        $scheme[] = $param;
+                    }
+                    $a++;
+                }
+            }
+            if ($a === 0) {
+                $test = substr($param, -1);
+                if ($test === '\'') {
+                    if (! in_array($param, $otherKeyword)) {
+                        $otherKeyword[] = $param;
+                    }
+                    $a++;
+                }
+            }
+            if ($a === 0) {
+                $n = substr_count($param, '.');
+                if ($n > 0) {
+                    if (! in_array($param, $host)) {
+                        $host[] = $param;
+                    }
+                    $a++;
+                }
+            }
+        }
+        foreach ($scheme as $param) {
+            if (! in_array($param, $childSrc)) {
+                $childSrc[] = $param;
+            }
+        }
+        foreach ($otherKeyword as $param) {
+            if (! in_array($param, $childSrc)) {
+                $childSrc[] = $param;
+            }
+        }
+        foreach ($scheme as $param) {
+            if (! in_array($param, $childSrc)) {
+                $childSrc[] = $param;
+            }
+        }
+        foreach ($host as $param) {
+            if (! in_array($param, $childSrc)) {
+                $childSrc[] = $param;
+            }
+        }
+        return $childSrc;
+    }//end generateChildFetchDirective()
+
     
     /**
      * Determines if the array is set to 'none'.
@@ -1042,12 +1175,12 @@ class ContentSecurityPolicy
                 return $this->addNonce($directive, $nonce);
               break;
             default:
-                if($directive === 'script-src') {
+                if ($directive === 'script-src') {
                     if ($policy === '\'strict-dynamic\'') {
                         return $this->setStrictDynamic('script-src');
                     }
                     if ($policy === '\'report-sample\'') {
-                        if(! is_null($this->reportUri)) {
+                        if (! is_null($this->reportUri)) {
                             return $this->setPolicyParameter('script-src', $policy);
                         } else {
                             return false;
@@ -1153,16 +1286,10 @@ class ContentSecurityPolicy
         /* These inherit from default if empty */
         
         /* child-src is deprecated but some browsers may still need it */
-        $childSrc = array();
-        foreach ($this->frameSrc as $policy) {
-            $childSrc[] = $policy;
-        }
-        foreach ($this->workerSrc as $policy) {
-            if (! in_array($policy, $childSrc)) {
-                $childSrc[] = $policy;
-            }
-        }
-        if ($childSrc !== $this->defaultSrc) {
+        $childSrc = $this->generateChildFetchDirective();
+        if ($childSrc === $this->defaultSrc) {
+            $childSrc = array();
+        } else {
             if (count($childSrc) > 0) {
                 // check for empty frameSrc
                 if (count($this->frameSrc) === 0) {
@@ -1310,7 +1437,7 @@ class ContentSecurityPolicy
      */
     public function __construct($param = null, bool $reportOnly = false)
     {
-        if($reportOnly) {
+        if ($reportOnly) {
             $this->reportOnly = true;
         }
         if (is_null($param)) {

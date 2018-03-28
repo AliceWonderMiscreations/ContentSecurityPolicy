@@ -421,7 +421,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $csp->addNonce('style-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScrAddNonceViaAddNonce()
+
     
     /**
      * Tests header output unsafe-inline then nonce.
@@ -439,7 +440,8 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $csp->addNonce('style-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testStyleSrcUnsafeInlineThenNonce()
+
     
     /**
      * Tests header output nonce then unsafe-inline.
@@ -457,19 +459,7 @@ final class FetchDirectiveStyleSrcTest extends TestCase
         $csp->addFetchPolicy('style-src', 'unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
-    
-    
-    
-    
-     
-
-
-
-
-
-
-
+    }//end testStyleSrcNonceThenUnsafeInline()
 }//end class
 
 ?>

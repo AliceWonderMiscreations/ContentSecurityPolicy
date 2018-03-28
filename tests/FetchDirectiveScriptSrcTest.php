@@ -437,7 +437,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
         $csp->addNonce('script-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScrAddNonceViaAddNonce()
+
     
     /**
      * Tests header output unsafe-inline then nonce.
@@ -455,7 +456,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
         $csp->addNonce('script-src', $nonce);
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptSrcUnsafeInlineThenNonce()
+
     
     /**
      * Tests header output nonce then unsafe-inline.
@@ -473,7 +475,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
         $csp->addFetchPolicy('script-src', 'unsafe-inline');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptSrcNonceThenUnsafeInline()
+
     
     /**
      * Set the strict-dynamic parameter in script-src.
@@ -508,7 +511,8 @@ final class FetchDirectiveScriptSrcTest extends TestCase
         $csp->addFetchPolicy('script-src', 'strict-dynamic');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testScriptSetStrictDynamic()
+
     
     /**
      * Test header output with report-sample
@@ -532,15 +536,7 @@ final class FetchDirectiveScriptSrcTest extends TestCase
         $this->assertEquals($expected, $actual);
         // third test - add a report-to
         //  TODO FIXME function to do so not yet written
-    }
-     
-
-
-
-
-
-
-
+    }//end testScriptReportSample()
 }//end class
 
 ?>
