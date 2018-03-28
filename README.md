@@ -531,7 +531,7 @@ This allows you to specify information that should be sent with the HTTP
 `referer` (sic) header.
 
 It is considered obsolete and should not be used, use the
-[`Referrer-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
+[`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
 header instead, which is a separate header from CSP.
 
 
