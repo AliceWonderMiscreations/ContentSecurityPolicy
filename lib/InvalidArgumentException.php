@@ -57,6 +57,21 @@ class InvalidArgumentException extends \InvalidArgumentException
             $arg
         ));
     }//end invalidFetchDirective()
+    
+    /**
+     * Exception message when an invalid document directive is specified
+     *
+     * @param string $arg The supplied invalid directive.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function invalidDocumentDirective(string $arg)
+    {
+        return new self(sprintf(
+            'The specified directive \'%s\' is not a valid CSP document directive.',
+            $arg
+        ));
+    }
 
     
     /**
@@ -184,4 +199,34 @@ class InvalidArgumentException extends \InvalidArgumentException
             'The hash must be a valid hex or base64 encoded hash.'
         ));
     }//end badHash()
+    
+    /**
+     * Exception message when the supplied argument is not a valid mime type
+     *
+     * @param string $arg The mime that was supplied.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function badMime(string $arg)
+    {
+        return new self(sprintf(
+            'The supplied argument \'%s\' is not a valid MIME type.',
+            $arg
+        ));
+    }
+    
+    /**
+     * Exception message when the supplied argument is not a valid sandbox value
+     *
+     * @param string $arg The value that was supplied.
+     *
+     * @return \InvalidArgumentException
+     */
+    public static function badSandboxValue(string $arg)
+    {
+        return new self(sprintf(
+            'The supplied argument \'%s\' is not a valid CSP sandbox parameter.',
+            $arg
+        ));
+    }
 }//end class

@@ -495,7 +495,35 @@ when error reporting is enabled.
 It instructs the client to include the portion of the violating JavaScript that
 caused a CSP violation in its report about that violation.
 
+Setting Document Directive Policy Parameters
+--------------------------------------------
 
+At this time, the `disown-opener` directive is not supported by this class.
+
+It appears to be a problematic directive that does not actually provide what it
+was originally intended to provide, and MDN recommends that it not be used on
+production systems because it is still undergoing changes while they sort out
+what it is suppose to do.
+
+See the
+[W3C Notes](https://w3c.github.io/webappsec-csp/#directive-disown-opener).
+
+### Base URI Parameters
+
+This directive allows you to define what domains are allowed within an HTML
+[`<base>`](https://developer.mozilla.org/id/docs/Web/HTML/Element/base) tag
+`href` attribute.
+
+It can be set to the keywords `'self'` or `'none'` in additions to domains.
+
+In this class, it can be set with the `SetBaseUriPolicy()` function:
+
+    $csp->SetBaseUriPolicy('self');
+
+I recommend setting it to `'self'` but the default does not set it at all.
+
+Please note this does not set the `href` attribute, it only defines what is
+legal in the `href` attribute should the document even have a `<base>` tag.
 
 
 

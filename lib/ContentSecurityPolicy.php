@@ -23,7 +23,7 @@ namespace AWonderPHP\ContentSecurityPolicy;
 class ContentSecurityPolicy
 {
     /**
-     * Valid CSP Fetch Directives excluding default-src.
+     * Valid CSP Fetch Directives excluding default-src and child-src.
      *
      * @var array
      */
@@ -38,6 +38,49 @@ class ContentSecurityPolicy
         'script-src',
         'style-src',
         'worker-src'
+    );
+    
+    /**
+     * Valid CSP Document Directives.
+     *
+     * @var array
+     */
+    protected $documentDirectives = array(
+        'base-uri',
+        'plugin-types',
+        'sandbox',
+        'disown-opener'
+    );
+    
+    /**
+     * Valid CSP Navigation Directives.
+     *
+     * @var array
+     */
+    protected $navigationDirectives = array(
+        'form-action',
+        'frame-ancestors',
+        'navigation-to'
+    );
+    
+    /**
+     * Valid CSP Reporting Directives.
+     *
+     * @var array
+     */
+    protected $reportingDirectives = array(
+        'report-uri',
+        'report-to',
+    );
+    
+    /**
+     * Valid CSP Misc Directives excluding block-all-mixed-content and referrer
+     *
+     * @var array
+     */
+    protected $miscDirectives = array(
+        'require-sri-for',
+        'upgrade-insecure-requests'
     );
 
     /**
@@ -152,7 +195,7 @@ class ContentSecurityPolicy
      *
      * @var array
      */
-    protected $pluginTypes = array('image/svg+xml', 'application/pdf');
+    protected $pluginTypes = array();
 
     /**
      * Enables a sandbox for the requested resource similar to the <iframe> sandbox attribute.
@@ -592,6 +635,21 @@ class ContentSecurityPolicy
                     }
                 }
                 break;
+            // document directives
+            case 'base-uri':
+                if ($this->checkForNone($this->baseUri)) {
+                    $this->baseUri = array($policy);
+                } else {
+                    if (! in_array($policy, $this->baseUri)) {
+                        $this->baseUri[] = $policy;
+                    }
+                }
+                break;
+            case 'sandbox':
+                if (! in_array($policy, $this->sandbox)) {
+                    $this->sandbox[] = $policy;
+                }
+                break;
             default:
                 return false;
                 break;
@@ -652,6 +710,10 @@ class ContentSecurityPolicy
                 break;
             case 'frame-ancestors':
                 $this->frameAncestors = array($keyword);
+                break;
+            // document directives
+            case 'base-uri':
+                $this->baseUri = array($keyword);
                 break;
             default:
                 return false;
@@ -912,7 +974,7 @@ class ContentSecurityPolicy
      *
      * @return bool
      */
-    protected function addHostPolicy(string $directive, string $url)
+    protected function addHostPolicy(string $directive, string $url): bool
     {
         if ($url === '*') {
             trigger_error('Setting a host policy parameter to \'*\' is allowed but is not secure.', E_USER_NOTICE);
@@ -1094,9 +1156,76 @@ class ContentSecurityPolicy
                 }
                 // default to url
                 return $this->addHostPolicy($directive, $policy);
+                break;
         }
         return false;
     }//end addFetchPolicy()
+    
+    // Document Directive Functions
+    
+    /**
+     * Add or create a policy to base-uri directive.
+     *
+     * @param string $policy    The CSP policy parameter.
+     *
+     * @return bool True on success, False on failure.
+     */
+    public function setBaseUriPolicy(string $policy): bool
+    {
+        $policy = $this->adjustPolicy($policy);
+        //if (! in_array($directive, $this->documentDirectives)) {
+        //    throw InvalidArgumentException::invalidDocumentDirective($directive);
+        //}
+        if (in_array($policy, array('\'none\'', '\'self\''))) {
+            return $this->addPolicyKeyword('base-uri', $policy);
+        }
+        return $this->addHostPolicy('base-uri', $policy);
+    }
+    
+    /**
+     * Add or create a policy to plugin-types directive
+     *
+     * @param string $mime The mime type to add.
+     *
+     * @return bool True on success, False on failure.
+     */
+    public function setPluginTypesPolicy(string $mime): bool
+    {
+        $mime = strtolower($this->adjustPolicy($mime));
+        $arr = explode('/', $mime);
+        if(count($arr) !== 2) {
+            throw InvalidArgumentException::badMime($mime);
+        }
+        if(! in_array($arr[0], array(
+            'application',
+            'audio',
+            'image',
+            'text',
+            'video'
+        ))) {
+            throw InvalidArgumentException::badMime($mime);
+        }
+        if(! in_array($mime, $this->pluginTypes)) {
+            $this->pluginTypes[] = $mime;
+        }
+        return true;
+    }
+    
+    /**
+     * Add or create a sandbox directive policy.
+     *
+     * @param string $policy The policy to add.
+     *
+     * @return bool True on success, False on failure.
+     */
+    public function setSandboxPolicy(string $policy): bool
+    {
+        $policy = strtolower($this->adjustPolicy($policy));
+        if(! in_array($policy, $this->validSandboxValues)) {
+          throw InvalidArgumentException::badSandboxValue($policy);
+        }
+        return $this->setPolicyParameter('sandbox', $policy);
+    }
 
     /**
      * This generates a nonce. A nonce for CSP is a different concept than with cryptography.
@@ -1295,12 +1424,15 @@ class ContentSecurityPolicy
 
         /* These do not inherit from default if empty */
 
-        // missing baseURI
+        if (count($this->baseUri) > 0) {
+            $directives[] = 'base-uri ' . implode(' ', $this->baseUri) . ';';
+        }
 
-        if (count($this->pluginTypes) > 0) {
-            if ($this->objectsAllowed()) {
-                $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
-            }
+        if(count($this->pluginTypes) === 0) {
+          $this->pluginTypes = array('image/svg+xml', 'application/pdf');
+        }
+        if ($this->objectsAllowed()) {
+            $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';
         }
         if (count($this->sandbox) > 0) {
             $directives[] = 'sandbox ' . implode(' ', $this->sandbox) . ';';
