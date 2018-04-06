@@ -525,6 +525,10 @@ I recommend setting it to `'self'` but the default does not set it at all.
 Please note this does not set the `href` attribute, it only defines what is
 legal in the `href` attribute should the document even have a `<base>` tag.
 
+### Plugin Types Parameters
+
+
+
 
 
 
