@@ -527,6 +527,54 @@ legal in the `href` attribute should the document even have a `<base>` tag.
 
 ### Plugin Types Parameters
 
+This parameter allows you to specify the MIME types that are allowed when the
+`<object>`, `<embed>`, or `<applet>` tag is allowed. It only has meaning when
+in the context of one of those tags. The latter two are deprecated, you really
+should only use the `<object>` tag, but browsers will still recognize the other
+two.
+
+To add a MIME type to the list of allowed MIME types with an `<object>` tag,
+use the `setPluginTypesPolicy()` function:
+
+    $csp->setPluginTypesPolicy('application/x-shockwave-flash');
+
+When using the `<applet>` tag (for Java Applets) you must use
+
+    $csp->setPluginTypesPolicy('application/x-java-applet');
+
+Please note that due to very valid security concerns, many web browsers do not
+support Flash or Java applets anymore.
+
+When no plugin type has been defined, this class will default to allowing the
+following two MIME types:
+
+* `image/svg+xml`  
+  The MIME type needed for SVG images embedded with an `<object>` tag.
+
+* `application/pdf`  
+  The MIME type needed to embed a PDF web page in a document.
+
+Those are two most common types of documents I use within an `<object>` tag.
+
+Once you have explicitly set a MIME type, those two defaults will need to
+explicitly be added if you want them.
+
+### Sandbox Parameters
+
+The `sandbox` directive only works when the CSP is sent as a header and does
+not have any effect in Report Only mode.
+
+To set the parameters to the `sandbox` directive, use the `setSandboxPolicy()`
+method:
+
+    $csp->setSandboxPolicy('allow-forms');
+
+The full list of legal parameters can be found at
+[https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/sandbox](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/sandbox).
+
+### Navigation To Parameters
+
+This directive is not yet supported by this class and is still experimental.
 
 
 
