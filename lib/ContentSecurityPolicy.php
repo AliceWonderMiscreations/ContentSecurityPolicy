@@ -1180,7 +1180,8 @@ class ContentSecurityPolicy
             return $this->addPolicyKeyword('base-uri', $policy);
         }
         return $this->addHostPolicy('base-uri', $policy);
-    }
+    }//end setBaseUriPolicy()
+
     
     /**
      * Add or create a policy to plugin-types directive
@@ -1193,10 +1194,10 @@ class ContentSecurityPolicy
     {
         $mime = strtolower($this->adjustPolicy($mime));
         $arr = explode('/', $mime);
-        if(count($arr) !== 2) {
+        if (count($arr) !== 2) {
             throw InvalidArgumentException::badMime($mime);
         }
-        if(! in_array($arr[0], array(
+        if (! in_array($arr[0], array(
             'application',
             'audio',
             'image',
@@ -1205,11 +1206,12 @@ class ContentSecurityPolicy
         ))) {
             throw InvalidArgumentException::badMime($mime);
         }
-        if(! in_array($mime, $this->pluginTypes)) {
+        if (! in_array($mime, $this->pluginTypes)) {
             $this->pluginTypes[] = $mime;
         }
         return true;
-    }
+    }//end setPluginTypesPolicy()
+
     
     /**
      * Add or create a sandbox directive policy.
@@ -1221,11 +1223,12 @@ class ContentSecurityPolicy
     public function setSandboxPolicy(string $policy): bool
     {
         $policy = strtolower($this->adjustPolicy($policy));
-        if(! in_array($policy, $this->validSandboxValues)) {
-          throw InvalidArgumentException::badSandboxValue($policy);
+        if (! in_array($policy, $this->validSandboxValues)) {
+            throw InvalidArgumentException::badSandboxValue($policy);
         }
         return $this->setPolicyParameter('sandbox', $policy);
-    }
+    }//end setSandboxPolicy()
+
 
     /**
      * This generates a nonce. A nonce for CSP is a different concept than with cryptography.
@@ -1428,8 +1431,8 @@ class ContentSecurityPolicy
             $directives[] = 'base-uri ' . implode(' ', $this->baseUri) . ';';
         }
 
-        if(count($this->pluginTypes) === 0) {
-          $this->pluginTypes = array('image/svg+xml', 'application/pdf');
+        if (count($this->pluginTypes) === 0) {
+            $this->pluginTypes = array('image/svg+xml', 'application/pdf');
         }
         if ($this->objectsAllowed()) {
             $directives[] = 'plugin-types ' . implode(' ', $this->pluginTypes) . ';';

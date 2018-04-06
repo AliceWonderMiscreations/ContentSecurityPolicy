@@ -27,7 +27,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp->SetBaseUriPolicy('self');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testBaseUriSelfViaSetBaseUriPolicy()
+
     
     /**
      * Test header output setting base-uri to none with setBaseUriPolicy
@@ -41,7 +42,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp->SetBaseUriPolicy('none');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testBaseUriNoneViaSetBaseUriPolicy()
+
     
     /**
      * Test header output setting base-uri to host with setBaseUriPolicy
@@ -55,7 +57,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp->SetBaseUriPolicy('https://example.org');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testBaseUriHostViaSetBaseUriPolicy()
+
     
     /**
      * Test header output with default pluginTypes
@@ -68,7 +71,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp = new \AWonderPHP\ContentSecurityPolicy\ContentSecurityPolicy('self');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testDefaultPluginTypes()
+
     
     /**
      * Test header output with pluginTypes set to text/plain
@@ -82,7 +86,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp->setPluginTypesPolicy('text/plain');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testPluginTypesTextPlain()
+
     
     /**
      * Test header output with pluginTypes set to application/x-shockwave-flash
@@ -96,7 +101,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp->setPluginTypesPolicy('application/x-shockwave-flash');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testPluginTypesFlash()
+
     
     /**
      * Test header output setting sanbox to allow-pointer-lock
@@ -110,7 +116,8 @@ final class DocumentDirectivesTest extends TestCase
         $csp->setSandboxPolicy('allow-pointer-lock');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
+    }//end testSandboxAllowPointerLock()
+
     
     /**
      * Test header output setting sanbox to allow-pointer-lock and allow-scripts
@@ -125,28 +132,7 @@ final class DocumentDirectivesTest extends TestCase
         $csp->setSandboxPolicy('allow-scripts');
         $actual = $csp->buildHeader();
         $this->assertEquals($expected, $actual);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }//end testSandboxAllowPointerLockAndAllowScripts()
+}//end class
 
 ?>

@@ -71,7 +71,8 @@ class InvalidArgumentException extends \InvalidArgumentException
             'The specified directive \'%s\' is not a valid CSP document directive.',
             $arg
         ));
-    }
+    }//end invalidDocumentDirective()
+
 
     
     /**
@@ -213,7 +214,8 @@ class InvalidArgumentException extends \InvalidArgumentException
             'The supplied argument \'%s\' is not a valid MIME type.',
             $arg
         ));
-    }
+    }//end badMime()
+
     
     /**
      * Exception message when the supplied argument is not a valid sandbox value
@@ -228,5 +230,5 @@ class InvalidArgumentException extends \InvalidArgumentException
             'The supplied argument \'%s\' is not a valid CSP sandbox parameter.',
             $arg
         ));
-    }
+    }//end badSandboxValue()
 }//end class
